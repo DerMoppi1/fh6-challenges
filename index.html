@@ -163,6 +163,28 @@
   .result-line b{color:var(--teal);}
 
   .actions-row{display:flex;justify-content:center;gap:10px;margin-top:14px;position:relative;z-index:1;}
+
+  .car-suggestions{
+    margin-top:18px;position:relative;z-index:1;
+    background:var(--bg-0);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;
+  }
+  .car-suggestions-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-bottom:10px;
+  }
+  #car-suggestions-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-dim);
+  }
+  #car-suggestions-label b{color:var(--teal);letter-spacing:normal;}
+  .car-chip-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .car-chip{
+    display:flex;align-items:center;gap:8px;
+    background:var(--bg-2);border:1px solid var(--line);border-radius:9px;
+    padding:7px 12px;font-size:14px;font-weight:600;
+  }
+  .car-chip .ic{width:16px;height:16px;flex:none;opacity:.8;color:var(--orange-2);}
   .ghost-btn{
     background:transparent;border:1px solid var(--line);color:var(--ink-dim);
     font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;
@@ -260,6 +282,15 @@
 
     <div class="cta-row"><button id="go-btn">Challenge starten</button></div>
     <div class="result-line" id="result-line">Bereit für den ersten Dreh.</div>
+
+    <div class="car-suggestions" id="car-suggestions" style="display:none;">
+      <div class="car-suggestions-head">
+        <span id="car-suggestions-label">Vorschläge für Klasse</span>
+        <button class="ghost-btn" id="reroll-cars-btn">Andere Vorschläge</button>
+      </div>
+      <div class="car-chip-list" id="car-chip-list"></div>
+    </div>
+
     <div class="actions-row">
       <button class="ghost-btn" id="copy-btn">Ergebnis kopieren</button>
     </div>
@@ -369,6 +400,32 @@ function iconDrag(){
   <circle cx="12" cy="6.5" r="2" fill="#ffb200"/>
   <circle cx="12" cy="12" r="2" fill="#ffb200" opacity=".5"/>
   <circle cx="12" cy="17.5" r="2" fill="#2ee66b"/>
+  </svg>`;
+}
+
+const CAR_POOL = {
+  D: ["Fiat 500 (Classic)", "VW Käfer 1303", "Mini Cooper (Classic)", "Citroën 2CV", "Fiat Panda 4x4", "Renault 5 GTL", "Trabant 601"],
+  C: ["VW Golf GTI Mk2", "Mazda MX-5 (NA)", "Peugeot 205 GTI", "Ford Fiesta ST", "Opel Kadett GSi", "Renault Clio RS", "Honda Civic Type R (EK9)"],
+  B: ["Nissan 350Z", "Toyota GT86", "BMW M3 (E46)", "Audi TT 3.2", "Subaru WRX", "Alfa Romeo Giulietta QV", "Ford Mustang GT (Base)"],
+  A: ["BMW M4", "Chevrolet Camaro SS", "Nissan GT-R (Premium)", "Porsche 911 Carrera S", "Audi RS3", "Mercedes-AMG C63", "Dodge Challenger SRT"],
+  S1: ["Ferrari 488 GTB", "McLaren 570S", "Lamborghini Huracán", "Porsche 911 Turbo S", "Audi R8 V10", "Nissan GT-R Nismo", "Aston Martin Vantage"],
+  S2: ["Lamborghini Aventador SVJ", "Ferrari SF90 Stradale", "McLaren 720S", "Bugatti Chiron", "Koenigsegg Jesko", "Pagani Huayra", "Porsche 918 Spyder"],
+  R: ["McLaren Senna", "Ferrari FXX-K", "Aston Martin Valkyrie", "Mercedes-AMG ONE", "Koenigsegg Regera", "Czinger 21C"],
+  X: ["Nissan GT-R Drag-Build (1000+ PS)", "Ford Mustang Pro-Street-Build", "Toyota Supra Widebody Drag-Car", "Camaro ZL1 1LE Extremtuning", "Honda Civic Time-Attack-Build", "Porsche 911 GT2 RS Track-Monster"]
+};
+
+function pickCarSuggestions(className, count=3){
+  const pool = CAR_POOL[className] || [];
+  const shuffled = [...pool].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0, Math.min(count, pool.length));
+}
+
+function iconCar(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M4 15l1.4-4.5A2 2 0 0 1 7.3 9h9.4a2 2 0 0 1 1.9 1.5L20 15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="3" y="15" width="18" height="4" rx="1.4" stroke="currentColor" stroke-width="1.6"/>
+  <circle cx="7.5" cy="19" r="1.4" fill="currentColor"/>
+  <circle cx="16.5" cy="19" r="1.4" fill="currentColor"/>
   </svg>`;
 }
 
@@ -485,6 +542,17 @@ function runShiftLights(duration){
   });
 }
 
+function renderCarSuggestions(className){
+  const panel = document.getElementById('car-suggestions');
+  const label = document.getElementById('car-suggestions-label');
+  const list = document.getElementById('car-chip-list');
+  const cars = pickCarSuggestions(className, 3);
+
+  label.innerHTML = `Vorschläge für Klasse <b>${className}</b>`;
+  list.innerHTML = cars.map(name => `<span class="car-chip">${iconCar()}<span>${name}</span></span>`).join('');
+  panel.style.display = cars.length ? 'block' : 'none';
+}
+
 async function spin(){
   if(state.spinning) return;
   if(!checkPools()) return;
@@ -518,6 +586,7 @@ async function spin(){
   const clsObj = CLASSES.find(c=>c.name===chosenClass.name);
   state.history.unshift({ ...state.last, icon: chosenRace.icon, style: classStyle(clsObj) });
   renderHistory();
+  renderCarSuggestions(chosenClass.name);
 
   state.spinning = false;
   checkPools();
@@ -584,6 +653,10 @@ checkPools();
 
 goBtn.addEventListener('click', spin);
 
+document.getElementById('reroll-cars-btn').addEventListener('click', ()=>{
+  if(state.last) renderCarSuggestions(state.last.cls);
+});
+
 document.getElementById('clear-hist').addEventListener('click', ()=>{
   state.history = [];
   renderHistory();
@@ -591,7 +664,9 @@ document.getElementById('clear-hist').addEventListener('click', ()=>{
 
 document.getElementById('copy-btn').addEventListener('click', async ()=>{
   if(!state.last){ return; }
-  const text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}`;
+  const cars = [...document.querySelectorAll('#car-chip-list .car-chip span:last-child')].map(s=>s.textContent);
+  let text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}`;
+  if(cars.length) text += `\nFahrzeugvorschläge: ${cars.join(', ')}`;
   try{
     await navigator.clipboard.writeText(text);
     const btn = document.getElementById('copy-btn');
