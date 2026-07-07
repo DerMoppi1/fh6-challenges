@@ -438,20 +438,98 @@ function iconDrag(){
 }
 
 const CAR_POOL = {
-  D: ["Fiat 500 (Classic)", "VW Käfer 1303", "Mini Cooper (Classic)", "Citroën 2CV", "Fiat Panda 4x4", "Renault 5 GTL", "Trabant 601"],
-  C: ["VW Golf GTI Mk2", "Mazda MX-5 (NA)", "Peugeot 205 GTI", "Ford Fiesta ST", "Opel Kadett GSi", "Renault Clio RS", "Honda Civic Type R (EK9)"],
-  B: ["Nissan 350Z", "Toyota GT86", "BMW M3 (E46)", "Audi TT 3.2", "Subaru WRX", "Alfa Romeo Giulietta QV", "Ford Mustang GT (Base)"],
-  A: ["BMW M4", "Chevrolet Camaro SS", "Nissan GT-R (Premium)", "Porsche 911 Carrera S", "Audi RS3", "Mercedes-AMG C63", "Dodge Challenger SRT"],
-  S1: ["Ferrari 488 GTB", "McLaren 570S", "Lamborghini Huracán", "Porsche 911 Turbo S", "Audi R8 V10", "Nissan GT-R Nismo", "Aston Martin Vantage"],
-  S2: ["Lamborghini Aventador SVJ", "Ferrari SF90 Stradale", "McLaren 720S", "Bugatti Chiron", "Koenigsegg Jesko", "Pagani Huayra", "Porsche 918 Spyder"],
-  R: ["McLaren Senna", "Ferrari FXX-K", "Aston Martin Valkyrie", "Mercedes-AMG ONE", "Koenigsegg Regera", "Czinger 21C"],
-  X: ["Nissan GT-R Drag-Build (1000+ PS)", "Ford Mustang Pro-Street-Build", "Toyota Supra Widebody Drag-Car", "Camaro ZL1 1LE Extremtuning", "Honda Civic Time-Attack-Build", "Porsche 911 GT2 RS Track-Monster"]
+  D: [
+    { name:"Fiat 500 (Classic)", types:["Old-school Klassiker"] },
+    { name:"VW Käfer 1303", types:["Old-school Klassiker"] },
+    { name:"Mini Cooper (Classic)", types:["Old-school Klassiker","Hot Hatch"] },
+    { name:"Citroën 2CV", types:["Old-school Klassiker"] },
+    { name:"Fiat Panda 4x4", types:["Rallye & Offroad"] },
+    { name:"Renault 5 GTL", types:["Old-school Klassiker","Hot Hatch"] },
+    { name:"Trabant 601", types:["Old-school Klassiker"] },
+  ],
+  C: [
+    { name:"VW Golf GTI Mk2", types:["Hot Hatch"] },
+    { name:"Mazda MX-5 (NA)", types:["Moderne Sportwagen","Old-school Klassiker"] },
+    { name:"Peugeot 205 GTI", types:["Hot Hatch"] },
+    { name:"Ford Fiesta ST", types:["Hot Hatch"] },
+    { name:"Opel Kadett GSi", types:["Hot Hatch"] },
+    { name:"Renault Clio RS", types:["Hot Hatch"] },
+    { name:"Honda Civic Type R (EK9)", types:["Hot Hatch","Track Toy"] },
+  ],
+  B: [
+    { name:"Nissan 350Z", types:["Moderne Sportwagen"] },
+    { name:"Toyota GT86", types:["Moderne Sportwagen","Track Toy"] },
+    { name:"BMW M3 (E46)", types:["Moderne Sportwagen","Track Toy"] },
+    { name:"Audi TT 3.2", types:["Moderne Sportwagen"] },
+    { name:"Subaru WRX", types:["Rallye & Offroad","Hot Hatch"] },
+    { name:"Alfa Romeo Giulietta QV", types:["Hot Hatch","Moderne Sportwagen"] },
+    { name:"Ford Mustang GT (Base)", types:["Muscle Car"] },
+  ],
+  A: [
+    { name:"BMW M4", types:["Moderne Sportwagen","Track Toy"] },
+    { name:"Chevrolet Camaro SS", types:["Muscle Car"] },
+    { name:"Nissan GT-R (Premium)", types:["Moderne Sportwagen","Track Toy"] },
+    { name:"Porsche 911 Carrera S", types:["Moderne Sportwagen"] },
+    { name:"Audi RS3", types:["Hot Hatch","Moderne Sportwagen"] },
+    { name:"Mercedes-AMG C63", types:["Super-Limousine"] },
+    { name:"Dodge Challenger SRT", types:["Muscle Car"] },
+  ],
+  S1: [
+    { name:"Ferrari 488 GTB", types:["Hypercar / Exot","Track Toy"] },
+    { name:"McLaren 570S", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Lamborghini Huracán", types:["Hypercar / Exot"] },
+    { name:"Porsche 911 Turbo S", types:["Moderne Sportwagen","Track Toy"] },
+    { name:"Audi R8 V10", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Nissan GT-R Nismo", types:["Track Toy","Moderne Sportwagen"] },
+    { name:"Aston Martin Vantage", types:["Moderne Sportwagen"] },
+  ],
+  S2: [
+    { name:"Lamborghini Aventador SVJ", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Ferrari SF90 Stradale", types:["Hypercar / Exot"] },
+    { name:"McLaren 720S", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Bugatti Chiron", types:["Hypercar / Exot","Super-Limousine"] },
+    { name:"Koenigsegg Jesko", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Pagani Huayra", types:["Hypercar / Exot"] },
+    { name:"Porsche 918 Spyder", types:["Hypercar / Exot","Track Toy"] },
+  ],
+  R: [
+    { name:"McLaren Senna", types:["Track Toy","Hypercar / Exot"] },
+    { name:"Ferrari FXX-K", types:["Track Toy","Hypercar / Exot"] },
+    { name:"Aston Martin Valkyrie", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Mercedes-AMG ONE", types:["Hypercar / Exot","Track Toy"] },
+    { name:"Koenigsegg Regera", types:["Hypercar / Exot"] },
+    { name:"Czinger 21C", types:["Hypercar / Exot","Track Toy"] },
+  ],
+  X: [
+    { name:"Nissan GT-R Drag-Build (1000+ PS)", types:["Track Toy"] },
+    { name:"Ford Mustang Pro-Street-Build", types:["Muscle Car","Track Toy"] },
+    { name:"Toyota Supra Widebody Drag-Car", types:["Track Toy"] },
+    { name:"Camaro ZL1 1LE Extremtuning", types:["Muscle Car","Track Toy"] },
+    { name:"Honda Civic Time-Attack-Build", types:["Hot Hatch","Track Toy"] },
+    { name:"Porsche 911 GT2 RS Track-Monster", types:["Track Toy","Moderne Sportwagen"] },
+  ]
 };
 
+// Picks a random vehicle type that's actually available within this class's
+// car pool, then returns up to `count` cars — preferring that type, and
+// topping up with other cars from the same class if too few match.
 function pickCarSuggestions(className, count=3){
   const pool = CAR_POOL[className] || [];
-  const shuffled = [...pool].sort(()=>Math.random()-0.5);
-  return shuffled.slice(0, Math.min(count, pool.length));
+  if(pool.length === 0) return { type:null, cars:[] };
+
+  const availableTypes = [...new Set(pool.flatMap(c=>c.types))];
+  const chosenType = availableTypes.length
+    ? availableTypes[Math.floor(Math.random()*availableTypes.length)]
+    : null;
+
+  const matching = chosenType ? pool.filter(c=>c.types.includes(chosenType)) : [];
+  const rest = pool.filter(c=>!matching.includes(c));
+
+  const shuffledMatching = [...matching].sort(()=>Math.random()-0.5);
+  const shuffledRest = [...rest].sort(()=>Math.random()-0.5);
+
+  const picked = [...shuffledMatching, ...shuffledRest].slice(0, Math.min(count, pool.length));
+  return { type: chosenType, cars: picked.map(c=>c.name) };
 }
 
 function iconCar(){
@@ -614,9 +692,11 @@ function renderCarSuggestions(className){
   const panel = document.getElementById('car-suggestions');
   const label = document.getElementById('car-suggestions-label');
   const list = document.getElementById('car-chip-list');
-  const cars = pickCarSuggestions(className, 3);
+  const { type, cars } = pickCarSuggestions(className, 3);
 
-  label.innerHTML = `Vorschläge für Klasse <b>${className}</b>`;
+  label.innerHTML = type
+    ? `Vorschläge für Klasse <b>${className}</b> &middot; Typ: <b>${type}</b>`
+    : `Vorschläge für Klasse <b>${className}</b>`;
   list.innerHTML = cars.map(name => `<span class="car-chip">${iconCar()}<span>${name}</span></span>`).join('');
   panel.style.display = cars.length ? 'block' : 'none';
 }
@@ -765,8 +845,10 @@ document.getElementById('clear-hist').addEventListener('click', ()=>{
 document.getElementById('copy-btn').addEventListener('click', async ()=>{
   if(!state.last){ return; }
   const cars = [...document.querySelectorAll('#car-chip-list .car-chip span:last-child')].map(s=>s.textContent);
-  let text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}`;
-  if(cars.length) text += `\nFahrzeugvorschläge: ${cars.join(', ')}`;
+  const typeLabelEl = document.getElementById('car-suggestions-label');
+  const typeMatch = typeLabelEl ? typeLabelEl.textContent.match(/Typ:\s*(.+)$/) : null;
+  let text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}${state.last.rule ? ' · '+state.last.rule : ''}`;
+  if(cars.length) text += `\nFahrzeugvorschläge${typeMatch ? ' ('+typeMatch[1]+')' : ''}: ${cars.join(', ')}`;
   try{
     await navigator.clipboard.writeText(text);
     const btn = document.getElementById('copy-btn');
