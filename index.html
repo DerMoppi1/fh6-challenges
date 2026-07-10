@@ -134,12 +134,12 @@
     transition:transform .1s linear;
   }
   .reel-item{
-    height:96px;display:flex;align-items:center;justify-content:center;gap:10px;
-    font-family:'Orbitron',sans-serif;font-weight:800;font-size:20px;
-    filter:blur(0px);
+    height:96px;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:17px;
+    filter:blur(0px);text-align:center;padding:0 8px;
   }
-  .reel-item .ic{width:30px;height:30px;flex:none;}
-  .reel-item span.txt{white-space:nowrap;}
+  .reel-item .ic{width:28px;height:28px;flex:none;}
+  .reel-item span.txt{white-space:normal;line-height:1.15;}
   .reel-item.rule-item{font-size:15px;padding:0 10px;text-align:center;}
   .reel-item.rule-item .ic{width:22px;height:22px;}
   .reel-item.rule-item span.txt{white-space:normal;line-height:1.15;}
@@ -280,7 +280,7 @@
   <div class="stripe"></div>
   <p class="eyebrow">Horizon Festival &middot; Zufallsgenerator</p>
   <h1>Challenge Generator</h1>
-  <p class="sub">Ein Dreh entscheidet: zufällige Rennart + Autoklasse. Stell dich der Kombination, egal wie schräg sie ist.</p>
+  <p class="sub">Ein Dreh entscheidet: zufälliges Event + Autoklasse. Stell dich der Kombination, egal wie schräg sie ist.</p>
 
   <div class="shared-banner" id="shared-banner" style="display:none;">
     <span>📨 Mit dir geteilte Challenge – wurde unten eingetragen.</span>
@@ -292,7 +292,7 @@
 
     <div class="reels" id="reels-grid">
       <div class="reel-box">
-        <div class="reel-label">Rennart</div>
+        <div class="reel-label">Event</div>
         <div class="reel-window"><div class="reel-track" id="track-race"></div></div>
       </div>
       <div class="reel-box">
@@ -325,7 +325,7 @@
 
   <div class="filters">
     <div class="filter-group">
-      <h3>Rennarten im Pool</h3>
+      <h3>Events im Pool</h3>
       <div class="chk-list" id="race-filters"></div>
     </div>
     <div class="filter-group">
@@ -356,6 +356,40 @@
 </div>
 
 <script>
+function iconSpeedTrap(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="7" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/>
+  <circle cx="10.5" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+  <path d="M17 10l3-2v8l-3-2z" fill="currentColor" opacity=".85"/>
+  </svg>`;
+}
+function iconSpeedZone(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 7l6 5-6 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 7l6 5-6 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
+  </svg>`;
+}
+function iconDangerSign(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 3l9 16H3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M12 9.5v4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="12" cy="16.3" r="1" fill="currentColor"/>
+  </svg>`;
+}
+function iconDriftZone(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M4 17c3 2 6-6 9-4s2 6 5 4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M4 12c3 2 6-6 9-4s2 6 5 4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".5"/>
+  </svg>`;
+}
+function iconTrailblazer(){
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 19c4-1 3-6 7-7s3-6 7-6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-dasharray="2.4 2.4"/>
+  <path d="M17 4l3 2-3 2z" fill="currentColor"/>
+  <circle cx="3.5" cy="19" r="1.4" fill="currentColor"/>
+  </svg>`;
+}
+
 const RACE_TYPES = [
   { name:"Streckenrennen", icon: iconCircuit() },
   { name:"Dirt-Rennen", icon: iconDirt() },
@@ -363,6 +397,11 @@ const RACE_TYPES = [
   { name:"Touge Rennen", icon: iconTouge() },
   { name:"Straßenrennen", icon: iconStreet() },
   { name:"Drag Rennen", icon: iconDrag() },
+  { name:"Blitzer", icon: iconSpeedTrap() },
+  { name:"Blitzerzone", icon: iconSpeedZone() },
+  { name:"Gefahrenschild", icon: iconDangerSign() },
+  { name:"Drift-Zone", icon: iconDriftZone() },
+  { name:"Trailblazer", icon: iconTrailblazer() },
 ];
 
 const CLASSES = [
@@ -634,7 +673,7 @@ function checkPools(){
   const ok = rp.length>0 && cp.length>0 && rulesOk;
   goBtn.disabled = !ok;
   warnMsg.textContent = ok ? '' : (rulesOk
-    ? 'Wähle mindestens eine Rennart und eine Autoklasse aus.'
+    ? 'Wähle mindestens ein Event und eine Autoklasse aus.'
     : 'Wähle mindestens eine Zusatzregel aus, oder schalte die Zusatzregeln aus.');
   return ok;
 }
