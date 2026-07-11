@@ -324,6 +324,69 @@
   #session-log-list li b{color:var(--ink);}
   #session-log-empty{color:var(--ink-dim);font-size:13px;font-style:italic;}
 
+  .danger-btn{border-color:#5a2a2a;color:#ff8a8a;}
+  .danger-btn:hover{border-color:var(--red);color:var(--red);}
+  .danger-btn-solid{
+    background:linear-gradient(90deg,#ff3b3b,#c92a2a);color:#fff;
+  }
+
+  /* ---------- Overlays (confirm modal + podium) ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(4,6,12,.72);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:1000;backdrop-filter:blur(3px);
+  }
+  .overlay-box{
+    background:linear-gradient(180deg,var(--bg-2),var(--bg-1));
+    border:1px solid var(--line);border-radius:18px;
+    padding:26px 24px;max-width:440px;width:100%;
+    box-shadow:0 24px 70px -20px rgba(0,0,0,.7);
+  }
+  .overlay-box h3{
+    font-family:'Orbitron',sans-serif;font-size:19px;margin:0 0 10px;color:var(--ink);
+  }
+  .overlay-box p{color:var(--ink-dim);font-size:14px;line-height:1.5;margin:0 0 18px;}
+  .overlay-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+
+  .podium-box{max-width:520px;}
+  .podium{
+    display:flex;align-items:flex-end;justify-content:center;gap:10px;
+    margin:26px 0 8px;min-height:190px;
+  }
+  .podium-slot{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    opacity:0;transform:translateY(16px);
+    animation:podium-in .5s ease forwards;
+  }
+  .podium-slot .medal{font-size:26px;}
+  .podium-slot .pname{
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;color:var(--ink);
+    text-align:center;max-width:120px;
+  }
+  .podium-slot .ppts{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);
+  }
+  .podium-block{
+    width:96px;border-radius:10px 10px 0 0;
+    display:flex;align-items:flex-start;justify-content:center;padding-top:10px;
+    font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;color:#0a0e18;
+  }
+  .podium-slot.place-1 .podium-block{height:120px;background:linear-gradient(180deg,#ffe27a,#ffb200);order:2;}
+  .podium-slot.place-2 .podium-block{height:92px;background:linear-gradient(180deg,#e7ecf5,#b9c3d6);order:1;}
+  .podium-slot.place-3 .podium-block{height:68px;background:linear-gradient(180deg,#e8a469,#c97a3d);order:3;}
+  .podium-slot.place-1{order:2;animation-delay:.5s;}
+  .podium-slot.place-2{order:1;animation-delay:.2s;}
+  .podium-slot.place-3{order:3;animation-delay:.05s;}
+  @keyframes podium-in{ to{ opacity:1; transform:translateY(0); } }
+
+  #podium-rest{margin-top:6px;}
+  #podium-rest .rest-row{
+    display:flex;justify-content:space-between;gap:10px;
+    padding:6px 4px;font-size:13px;color:var(--ink-dim);
+    border-top:1px solid var(--line);
+  }
+  #podium-rest .rest-row b{color:var(--ink);}
+
   /* ---------- History ---------- */
   .history{margin-top:30px;}
   .history h3{
@@ -423,6 +486,7 @@
           <span class="session-code-value" id="session-code-display"></span>
         </div>
         <button class="ghost-btn" id="leave-session-btn">Verlassen</button>
+        <button class="ghost-btn danger-btn" id="end-session-btn">Session beenden</button>
       </div>
 
       <div class="score-submit">
@@ -485,6 +549,29 @@
     <p id="hist-empty">Noch keine Challenge gestartet.</p>
   </div>
 
+</div>
+
+<div class="overlay" id="confirm-overlay" style="display:none;">
+  <div class="overlay-box">
+    <h3>Session wirklich beenden?</h3>
+    <p>Die aktuelle Rangliste wird als Abschluss gezeigt, danach verlässt du die Session. Die Daten bleiben aber in der Cloud erhalten, ihr könnt mit demselben Code später weitermachen.</p>
+    <div class="overlay-actions">
+      <button class="ghost-btn" id="confirm-cancel-btn">Abbrechen</button>
+      <button class="cta-small danger-btn-solid" id="confirm-ok-btn">Ja, beenden</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="podium-overlay" style="display:none;">
+  <div class="overlay-box podium-box">
+    <p class="eyebrow" style="text-align:center;">Session beendet</p>
+    <h3 style="text-align:center;">🏁 Endstand</h3>
+    <div class="podium" id="podium-stage"></div>
+    <div id="podium-rest"></div>
+    <div class="overlay-actions" style="justify-content:center;margin-top:20px;">
+      <button class="cta-small" id="podium-close-btn">Schließen & Session verlassen</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -559,7 +646,7 @@ const EVENT_DIRECTION = {
   "Touge Rennen": "asc",
   "Straßenrennen": "asc",
   "Drag Rennen": "asc",
-  "Trailblazer": "asc",
+  "Trailblazer": "desc",
   "Blitzer": "desc",
   "Blitzerzone": "desc",
   "Gefahrenschild": "desc",
@@ -1174,6 +1261,7 @@ const session = {
   unsubLog: null,
   unsubChallenge: null,
   currentDocs: [],
+  lastEntries: [],
 };
 
 async function broadcastChallengeToSession(){
@@ -1208,6 +1296,22 @@ function listenSessionChallenge(){
 function currentChallengeKey(){
   if(!state.last) return null;
   return { event: state.last.race, cls: state.last.cls, rule: state.last.rule || '' };
+}
+
+async function isCodeAvailable(code){
+  const docSnap = await db.collection('sessions').doc(code).get();
+  if(docSnap.exists) return false;
+  const entriesSnap = await db.collection('sessions').doc(code).collection('entries').limit(1).get();
+  return entriesSnap.empty;
+}
+
+async function generateUniqueSessionCode(){
+  for(let i=0;i<8;i++){
+    const code = generateSessionCode();
+    if(await isCodeAvailable(code)) return code;
+  }
+  // Astronomically unlikely fallback: widen the space with an extra digit.
+  return generateSessionCode() + Math.floor(Math.random()*10);
 }
 
 function joinSession(code){
@@ -1251,6 +1355,7 @@ function attachSessionListeners(){
     .orderBy('timestamp','desc').limit(500)
     .onSnapshot(snap => {
       const items = snap.docs.map(d => d.data());
+      session.lastEntries = items;
       renderSessionLog(items);
       renderStandings(items);
     }, err => {
@@ -1426,11 +1531,81 @@ document.getElementById('join-session-btn').addEventListener('click', ()=>{
 document.getElementById('session-code-input').addEventListener('keydown', e=>{
   if(e.key === 'Enter') joinSession(e.target.value);
 });
-document.getElementById('new-session-btn').addEventListener('click', ()=>{
-  joinSession(generateSessionCode());
+document.getElementById('new-session-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('new-session-btn');
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Erstelle Code...';
+  try{
+    const code = await generateUniqueSessionCode();
+    joinSession(code);
+  }catch(e){
+    console.error('Session code generation failed:', e);
+    document.getElementById('session-join-warn').textContent = 'Code-Erstellung fehlgeschlagen, bitte nochmal versuchen.';
+  }
+  btn.disabled = false;
+  btn.textContent = old;
 });
 document.getElementById('leave-session-btn').addEventListener('click', leaveSession);
 document.getElementById('submit-score-btn').addEventListener('click', submitScore);
+
+// ---- Confirm modal (used by "Session beenden") ----
+function showConfirm(){
+  return new Promise(resolve=>{
+    const overlay = document.getElementById('confirm-overlay');
+    overlay.style.display = 'flex';
+    const okBtn = document.getElementById('confirm-ok-btn');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+    function cleanup(result){
+      overlay.style.display = 'none';
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+  });
+}
+
+const MEDALS = ['🥇','🥈','🥉'];
+function renderPodium(standings){
+  const stage = document.getElementById('podium-stage');
+  const rest = document.getElementById('podium-rest');
+  const top3 = standings.slice(0,3);
+
+  stage.innerHTML = top3.map((s,i) => `
+    <div class="podium-slot place-${i+1}">
+      <span class="medal">${MEDALS[i]}</span>
+      <span class="pname">${escapeHtml(s.name)}</span>
+      <span class="ppts">${s.points} Pkt. · ${s.rounds} Runde${s.rounds===1?'':'n'}</span>
+      <div class="podium-block">${i+1}</div>
+    </div>`).join('');
+
+  const others = standings.slice(3);
+  rest.innerHTML = others.length === 0 ? '' : others.map((s,i) => `
+    <div class="rest-row"><span>${i+4}. <b>${escapeHtml(s.name)}</b></span><span>${s.points} Pkt.</span></div>
+  `).join('');
+
+  if(standings.length === 0){
+    stage.innerHTML = '<p style="color:var(--ink-dim);text-align:center;width:100%;">Es wurden keine Ergebnisse eingetragen.</p>';
+  }
+}
+
+document.getElementById('end-session-btn').addEventListener('click', async ()=>{
+  const confirmed = await showConfirm();
+  if(!confirmed) return;
+
+  const standings = computeSessionStandings(session.lastEntries);
+  renderPodium(standings);
+  document.getElementById('podium-overlay').style.display = 'flex';
+});
+
+document.getElementById('podium-close-btn').addEventListener('click', ()=>{
+  document.getElementById('podium-overlay').style.display = 'none';
+  leaveSession();
+});
 
 // Auto-rejoin a session if one was active on this device.
 (function restoreSession(){
