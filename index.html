@@ -294,6 +294,11 @@
     font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--ink-dim);
   }
+  .dir-badge#dir-badge{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);
+    border:1px solid var(--teal);border-radius:999px;padding:3px 10px;
+    text-transform:none;letter-spacing:normal;flex:none;
+  }
   #leaderboard-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
   #leaderboard-list li{
     display:flex;align-items:center;gap:12px;background:var(--bg-2);
@@ -429,10 +434,16 @@
       <div class="leaderboard-block">
         <div class="leaderboard-head">
           <span id="leaderboard-title">Bestenliste – erst eine Challenge würfeln</span>
-          <button class="ghost-btn" id="sort-toggle-btn">↕ Höher gewinnt</button>
+          <span class="dir-badge" id="dir-badge"></span>
         </div>
         <ol id="leaderboard-list"></ol>
         <p id="leaderboard-empty">Noch keine Einträge für diese Challenge.</p>
+      </div>
+
+      <div class="leaderboard-block">
+        <div class="leaderboard-head"><span>Gesamtwertung der Session</span></div>
+        <ol id="standings-list"></ol>
+        <p id="standings-empty">Noch keine Punkte vergeben – erst ein paar Challenges eintragen.</p>
       </div>
 
       <div class="leaderboard-block">
@@ -535,6 +546,27 @@ const RACE_TYPES = [
   { name:"Drift-Zone", icon: iconDriftZone() },
   { name:"Trailblazer", icon: iconTrailblazer() },
 ];
+
+// Determines, per event, whether a lower value wins (race/time-based) or a
+// higher value wins (PR-stunt style score/distance/speed events). Used both
+// for the live leaderboard sort and the session-wide points evaluation, so
+// it must be identical on every device — not a per-user toggle.
+const EVENT_DIRECTION = {
+  "Streckenrennen": "asc",
+  "Dirt-Rennen": "asc",
+  "Querfeldeinrennen": "asc",
+  "Touge Rennen": "asc",
+  "Straßenrennen": "asc",
+  "Drag Rennen": "asc",
+  "Trailblazer": "asc",
+  "Blitzer": "desc",
+  "Blitzerzone": "desc",
+  "Gefahrenschild": "desc",
+  "Drift-Zone": "desc",
+};
+function directionLabel(eventName){
+  return EVENT_DIRECTION[eventName] === 'desc' ? 'höher gewinnt' : 'niedriger gewinnt';
+}
 
 const CLASSES = [
   { name:"D",  color:"#8b96ad" },
@@ -1140,7 +1172,6 @@ const session = {
   unsubCurrent: null,
   unsubLog: null,
   unsubChallenge: null,
-  sortDesc: true,
   currentDocs: [],
 };
 
@@ -1216,10 +1247,11 @@ function leaveSession(){
 function attachSessionListeners(){
   if(session.unsubLog) session.unsubLog();
   session.unsubLog = db.collection('sessions').doc(session.code).collection('entries')
-    .orderBy('timestamp','desc').limit(50)
+    .orderBy('timestamp','desc').limit(500)
     .onSnapshot(snap => {
       const items = snap.docs.map(d => d.data());
       renderSessionLog(items);
+      renderStandings(items);
     }, err => {
       console.error('Session log listener error:', err);
     });
@@ -1231,10 +1263,12 @@ function updateSessionForCurrentChallenge(){
 
   const key = currentChallengeKey();
   const title = document.getElementById('leaderboard-title');
+  const badge = document.getElementById('dir-badge');
   const submitBtn = document.getElementById('submit-score-btn');
 
   if(!key){
     title.textContent = 'Bestenliste – erst eine Challenge würfeln';
+    badge.textContent = '';
     submitBtn.disabled = true;
     session.currentDocs = [];
     renderLeaderboard();
@@ -1243,6 +1277,7 @@ function updateSessionForCurrentChallenge(){
 
   submitBtn.disabled = false;
   title.textContent = `Bestenliste – ${key.event} · Klasse ${key.cls}${key.rule ? ' · '+key.rule : ''}`;
+  badge.textContent = directionLabel(key.event);
 
   session.unsubCurrent = db.collection('sessions').doc(session.code).collection('entries')
     .where('event','==',key.event).where('cls','==',key.cls).where('rule','==',key.rule)
@@ -1257,7 +1292,9 @@ function updateSessionForCurrentChallenge(){
 function renderLeaderboard(){
   const list = document.getElementById('leaderboard-list');
   const empty = document.getElementById('leaderboard-empty');
-  const sorted = [...session.currentDocs].sort((a,b) => session.sortDesc ? b.score - a.score : a.score - b.score);
+  const key = currentChallengeKey();
+  const dir = key ? EVENT_DIRECTION[key.event] : 'desc';
+  const sorted = [...session.currentDocs].sort((a,b) => dir === 'asc' ? a.score - b.score : b.score - a.score);
 
   if(sorted.length === 0){
     list.innerHTML = '';
@@ -1285,6 +1322,63 @@ function renderSessionLog(items){
   list.innerHTML = items.map(e => `
     <li><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></li>
   `).join('');
+}
+
+// Points rule: within each distinct challenge (event+class+rule), the worst
+// result gets 0 points and each place above it gets one point more. Equal
+// scores share the same points (tied places). Only a player's best entry per
+// challenge counts, so resubmitting doesn't inflate the total. Totals are
+// then summed across every challenge played this session.
+function computeSessionStandings(entries){
+  const groups = new Map(); // "event|cls|rule" -> Map(name -> bestScore)
+  entries.forEach(e=>{
+    const groupKey = `${e.event}|${e.cls}|${e.rule||''}`;
+    if(!groups.has(groupKey)) groups.set(groupKey, new Map());
+    const playerBest = groups.get(groupKey);
+    const dir = EVENT_DIRECTION[e.event] || 'desc';
+    const isBetter = (a,b) => dir === 'asc' ? a < b : a > b;
+    if(!playerBest.has(e.name) || isBetter(e.score, playerBest.get(e.name))){
+      playerBest.set(e.name, e.score);
+    }
+  });
+
+  const totals = new Map(); // name -> { points, rounds }
+  groups.forEach((playerBest, groupKey) => {
+    const [eventName] = groupKey.split('|');
+    const dir = EVENT_DIRECTION[eventName] || 'desc';
+    const uniqueScores = [...new Set(playerBest.values())]
+      .sort((a,b) => dir === 'asc' ? b - a : a - b); // worst first, so index 0 = 0 points
+    const scoreToPoints = new Map(uniqueScores.map((s,i)=>[s,i]));
+
+    playerBest.forEach((score, name)=>{
+      const points = scoreToPoints.get(score);
+      const prev = totals.get(name) || { points:0, rounds:0 };
+      totals.set(name, { points: prev.points + points, rounds: prev.rounds + 1 });
+    });
+  });
+
+  return [...totals.entries()]
+    .map(([name, v]) => ({ name, points: v.points, rounds: v.rounds }))
+    .sort((a,b) => b.points - a.points);
+}
+
+function renderStandings(entries){
+  const list = document.getElementById('standings-list');
+  const empty = document.getElementById('standings-empty');
+  const standings = computeSessionStandings(entries);
+
+  if(standings.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = standings.map((s,i) => `
+    <li class="rank-${i+1}">
+      <span class="rank">${i+1}</span>
+      <span class="pname">${escapeHtml(s.name)} <span style="color:var(--ink-dim);font-weight:500;">(${s.rounds} Runde${s.rounds===1?'':'n'})</span></span>
+      <span class="pscore">${s.points} Pkt.</span>
+    </li>`).join('');
 }
 
 function escapeHtml(str){
@@ -1336,11 +1430,6 @@ document.getElementById('new-session-btn').addEventListener('click', ()=>{
 });
 document.getElementById('leave-session-btn').addEventListener('click', leaveSession);
 document.getElementById('submit-score-btn').addEventListener('click', submitScore);
-document.getElementById('sort-toggle-btn').addEventListener('click', ()=>{
-  session.sortDesc = !session.sortDesc;
-  document.getElementById('sort-toggle-btn').textContent = session.sortDesc ? '↕ Höher gewinnt' : '↕ Niedriger gewinnt';
-  renderLeaderboard();
-});
 
 // Auto-rejoin a session if one was active on this device.
 (function restoreSession(){
