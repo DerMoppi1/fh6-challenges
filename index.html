@@ -917,6 +917,7 @@ async function spin(){
   renderCarSuggestions(chosenClass.name);
   updateShareLink();
   updateSessionForCurrentChallenge();
+  if(session.code) broadcastChallengeToSession();
 
   state.spinning = false;
   checkPools();
@@ -1047,10 +1048,11 @@ function updateShareLink(){
   if(btn) btn.disabled = !state.last;
 }
 
-function applySharedChallenge(raceName, clsName, ruleName){
+function applyChallengeStatic(raceName, clsName, ruleName, opts={}){
+  const { showBanner=false, broadcast=false } = opts;
   const raceObj = RACE_TYPES.find(r=>r.name===raceName);
   const clsObj = CLASSES.find(c=>c.name===clsName);
-  if(!raceObj || !clsObj) return;
+  if(!raceObj || !clsObj) return false;
   const ruleObj = ruleName ? RULES.find(r=>r.name===ruleName) : null;
 
   buildTrack(raceTrackEl, [raceObj], renderRaceItem, 1);
@@ -1082,7 +1084,13 @@ function applySharedChallenge(raceName, clsName, ruleName){
   updateShareLink();
   updateSessionForCurrentChallenge();
 
-  document.getElementById('shared-banner').style.display = 'flex';
+  if(showBanner) document.getElementById('shared-banner').style.display = 'flex';
+  if(broadcast) broadcastChallengeToSession();
+  return true;
+}
+
+function applySharedChallenge(raceName, clsName, ruleName){
+  applyChallengeStatic(raceName, clsName, ruleName, { showBanner:true });
 }
 
 document.getElementById('share-btn').addEventListener('click', async ()=>{
@@ -1131,9 +1139,39 @@ const session = {
   code: null,
   unsubCurrent: null,
   unsubLog: null,
+  unsubChallenge: null,
   sortDesc: true,
   currentDocs: [],
 };
+
+async function broadcastChallengeToSession(){
+  if(!session.code || !state.last) return;
+  try{
+    await db.collection('sessions').doc(session.code).set({
+      event: state.last.race,
+      cls: state.last.cls,
+      rule: state.last.rule || '',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true });
+  }catch(e){
+    console.error('broadcastChallengeToSession failed:', e);
+  }
+}
+
+function listenSessionChallenge(){
+  if(session.unsubChallenge) session.unsubChallenge();
+  session.unsubChallenge = db.collection('sessions').doc(session.code)
+    .onSnapshot(doc => {
+      const data = doc.data();
+      if(!data || !data.event || !data.cls) return;
+      const incomingRule = data.rule || '';
+      const localRule = (state.last && state.last.rule) || '';
+      const alreadyShowingThis = state.last && state.last.race === data.event
+        && state.last.cls === data.cls && localRule === incomingRule;
+      if(alreadyShowingThis) return; // avoid re-rendering our own broadcast echo
+      applyChallengeStatic(data.event, data.cls, data.rule || null, { showBanner:false });
+    }, err => console.error('Session challenge listener error:', err));
+}
 
 function currentChallengeKey(){
   if(!state.last) return null;
@@ -1158,12 +1196,14 @@ function joinSession(code){
   if(savedName) document.getElementById('player-name-input').value = savedName;
 
   attachSessionListeners();
+  listenSessionChallenge();
   updateSessionForCurrentChallenge();
 }
 
 function leaveSession(){
   if(session.unsubCurrent) session.unsubCurrent();
   if(session.unsubLog) session.unsubLog();
+  if(session.unsubChallenge) session.unsubChallenge();
   session.code = null;
   session.currentDocs = [];
   localStorage.removeItem('fh6-session-code');
