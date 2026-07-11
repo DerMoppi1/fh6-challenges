@@ -244,6 +244,80 @@
     min-height:18px;
   }
 
+  /* ---------- Session Leaderboard ---------- */
+  .session-card{margin-top:26px;}
+  .session-header h2{
+    font-family:'Orbitron',sans-serif;font-size:18px;margin:0 0 14px;color:var(--ink);
+    position:relative;z-index:1;
+  }
+  .session-hint{color:var(--ink-dim);font-size:14px;margin:0 0 14px;position:relative;z-index:1;}
+  .session-join-row{display:flex;gap:8px;margin-bottom:10px;position:relative;z-index:1;}
+  .session-join-row input{
+    flex:1;background:var(--bg-0);border:1px solid var(--line);border-radius:8px;
+    padding:10px 12px;color:var(--ink);font-family:'JetBrains Mono',monospace;
+    letter-spacing:.12em;text-transform:uppercase;font-size:15px;min-width:0;
+  }
+  .cta-small{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:13px;
+    background:linear-gradient(90deg,var(--orange-2),var(--orange));color:#0a0e18;
+    border:none;border-radius:8px;padding:10px 16px;cursor:pointer;flex:none;
+  }
+  .cta-small:hover{filter:brightness(1.06);}
+  .cta-small:disabled{opacity:.4;cursor:not-allowed;filter:none;}
+
+  .session-active-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:18px;flex-wrap:wrap;gap:10px;position:relative;z-index:1;
+  }
+  .session-code-label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--ink-dim);letter-spacing:.15em;text-transform:uppercase;
+  }
+  .session-code-value{
+    font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;
+    color:var(--teal);letter-spacing:.1em;
+  }
+
+  .score-submit{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;position:relative;z-index:1;}
+  .score-submit input{
+    background:var(--bg-0);border:1px solid var(--line);border-radius:8px;
+    padding:10px 12px;color:var(--ink);font-family:'Rajdhani',sans-serif;
+    font-size:14px;flex:1;min-width:140px;
+  }
+  .score-submit input#score-input{flex:0 0 160px;min-width:120px;}
+
+  .leaderboard-block{margin-top:22px;position:relative;z-index:1;}
+  .leaderboard-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;
+  }
+  .leaderboard-head span{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-dim);
+  }
+  #leaderboard-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  #leaderboard-list li{
+    display:flex;align-items:center;gap:12px;background:var(--bg-2);
+    border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:14px;
+  }
+  #leaderboard-list li .rank{font-family:'Orbitron',sans-serif;font-weight:900;width:22px;flex:none;color:var(--ink-dim);}
+  #leaderboard-list li.rank-1 .rank{color:#ffd23f;}
+  #leaderboard-list li.rank-2 .rank{color:#c9d3e0;}
+  #leaderboard-list li.rank-3 .rank{color:#d98a4a;}
+  #leaderboard-list li .pname{flex:1;font-weight:600;}
+  #leaderboard-list li .pscore{font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:700;}
+  #leaderboard-empty{color:var(--ink-dim);font-size:13px;font-style:italic;}
+
+  #session-log-list{
+    list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;
+    max-height:260px;overflow-y:auto;
+  }
+  #session-log-list li{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg-0);
+    border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-size:13px;color:var(--ink-dim);
+  }
+  #session-log-list li b{color:var(--ink);}
+  #session-log-empty{color:var(--ink-dim);font-size:13px;font-style:italic;}
+
   /* ---------- History ---------- */
   .history{margin-top:30px;}
   .history h3{
@@ -323,6 +397,52 @@
     <div class="warn" id="warn-msg"></div>
   </div>
 
+  <div class="card session-card" id="session-card">
+    <div class="session-header"><h2>🏆 Session-Leaderboard</h2></div>
+
+    <div id="session-join">
+      <p class="session-hint">Tritt dem Code eures heutigen Abends bei, oder starte einen neuen.</p>
+      <div class="session-join-row">
+        <input type="text" id="session-code-input" maxlength="6" placeholder="CODE eingeben" autocapitalize="characters">
+        <button class="cta-small" id="join-session-btn">Beitreten</button>
+      </div>
+      <button class="ghost-btn" id="new-session-btn">Neue Session starten</button>
+      <p class="warn" id="session-join-warn"></p>
+    </div>
+
+    <div id="session-active" style="display:none;">
+      <div class="session-active-head">
+        <div>
+          <span class="session-code-label">Session-Code</span>
+          <span class="session-code-value" id="session-code-display"></span>
+        </div>
+        <button class="ghost-btn" id="leave-session-btn">Verlassen</button>
+      </div>
+
+      <div class="score-submit">
+        <input type="text" id="player-name-input" placeholder="Dein Name" maxlength="24">
+        <input type="number" id="score-input" placeholder="Ergebnis (Zeit, Punkte, Meter...)" step="0.01">
+        <button class="cta-small" id="submit-score-btn">Eintragen</button>
+      </div>
+      <p class="warn" id="session-warn"></p>
+
+      <div class="leaderboard-block">
+        <div class="leaderboard-head">
+          <span id="leaderboard-title">Bestenliste – erst eine Challenge würfeln</span>
+          <button class="ghost-btn" id="sort-toggle-btn">↕ Höher gewinnt</button>
+        </div>
+        <ol id="leaderboard-list"></ol>
+        <p id="leaderboard-empty">Noch keine Einträge für diese Challenge.</p>
+      </div>
+
+      <div class="leaderboard-block">
+        <div class="leaderboard-head"><span>Session-Verlauf (alle Einträge heute)</span></div>
+        <ul id="session-log-list"></ul>
+        <p id="session-log-empty">Noch nichts eingetragen.</p>
+      </div>
+    </div>
+  </div>
+
   <div class="filters">
     <div class="filter-group">
       <h3>Events im Pool</h3>
@@ -355,7 +475,19 @@
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDNezbmbyokj5LI-wrI300B3NPlJncnpB0",
+  authDomain: "fh6-challenges.firebaseapp.com",
+  projectId: "fh6-challenges",
+  storageBucket: "fh6-challenges.firebasestorage.app",
+  messagingSenderId: "277586777695",
+  appId: "1:277586777695:web:1d1d4ffc97ec3548d3adea"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 function iconSpeedTrap(){
   return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="4" y="7" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/>
@@ -784,6 +916,7 @@ async function spin(){
   renderHistory();
   renderCarSuggestions(chosenClass.name);
   updateShareLink();
+  updateSessionForCurrentChallenge();
 
   state.spinning = false;
   checkPools();
@@ -947,6 +1080,7 @@ function applySharedChallenge(raceName, clsName, ruleName){
   renderHistory();
   renderCarSuggestions(clsObj.name);
   updateShareLink();
+  updateSessionForCurrentChallenge();
 
   document.getElementById('shared-banner').style.display = 'flex';
 }
@@ -980,6 +1114,198 @@ document.getElementById('dismiss-shared').addEventListener('click', ()=>{
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, '', cleanUrl);
   }
+})();
+
+// ---- Session Leaderboard (Firebase) ----
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no O/0, I/1 to avoid mix-ups
+function generateSessionCode(){
+  let code = '';
+  for(let i=0;i<5;i++) code += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
+  return code;
+}
+function normalizeCode(str){
+  return (str||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+}
+
+const session = {
+  code: null,
+  unsubCurrent: null,
+  unsubLog: null,
+  sortDesc: true,
+  currentDocs: [],
+};
+
+function currentChallengeKey(){
+  if(!state.last) return null;
+  return { event: state.last.race, cls: state.last.cls, rule: state.last.rule || '' };
+}
+
+function joinSession(code){
+  code = normalizeCode(code);
+  if(code.length < 4){
+    document.getElementById('session-join-warn').textContent = 'Bitte einen gültigen Code eingeben (mind. 4 Zeichen).';
+    return;
+  }
+  session.code = code;
+  localStorage.setItem('fh6-session-code', code);
+
+  document.getElementById('session-join').style.display = 'none';
+  document.getElementById('session-active').style.display = 'block';
+  document.getElementById('session-code-display').textContent = code;
+  document.getElementById('session-join-warn').textContent = '';
+
+  const savedName = localStorage.getItem('fh6-player-name');
+  if(savedName) document.getElementById('player-name-input').value = savedName;
+
+  attachSessionListeners();
+  updateSessionForCurrentChallenge();
+}
+
+function leaveSession(){
+  if(session.unsubCurrent) session.unsubCurrent();
+  if(session.unsubLog) session.unsubLog();
+  session.code = null;
+  session.currentDocs = [];
+  localStorage.removeItem('fh6-session-code');
+
+  document.getElementById('session-join').style.display = 'block';
+  document.getElementById('session-active').style.display = 'none';
+  document.getElementById('session-code-input').value = '';
+}
+
+function attachSessionListeners(){
+  if(session.unsubLog) session.unsubLog();
+  session.unsubLog = db.collection('sessions').doc(session.code).collection('entries')
+    .orderBy('timestamp','desc').limit(50)
+    .onSnapshot(snap => {
+      const items = snap.docs.map(d => d.data());
+      renderSessionLog(items);
+    }, err => {
+      console.error('Session log listener error:', err);
+    });
+}
+
+function updateSessionForCurrentChallenge(){
+  if(!session.code) return;
+  if(session.unsubCurrent) session.unsubCurrent();
+
+  const key = currentChallengeKey();
+  const title = document.getElementById('leaderboard-title');
+  const submitBtn = document.getElementById('submit-score-btn');
+
+  if(!key){
+    title.textContent = 'Bestenliste – erst eine Challenge würfeln';
+    submitBtn.disabled = true;
+    session.currentDocs = [];
+    renderLeaderboard();
+    return;
+  }
+
+  submitBtn.disabled = false;
+  title.textContent = `Bestenliste – ${key.event} · Klasse ${key.cls}${key.rule ? ' · '+key.rule : ''}`;
+
+  session.unsubCurrent = db.collection('sessions').doc(session.code).collection('entries')
+    .where('event','==',key.event).where('cls','==',key.cls).where('rule','==',key.rule)
+    .onSnapshot(snap => {
+      session.currentDocs = snap.docs.map(d => d.data());
+      renderLeaderboard();
+    }, err => {
+      console.error('Leaderboard listener error:', err);
+    });
+}
+
+function renderLeaderboard(){
+  const list = document.getElementById('leaderboard-list');
+  const empty = document.getElementById('leaderboard-empty');
+  const sorted = [...session.currentDocs].sort((a,b) => session.sortDesc ? b.score - a.score : a.score - b.score);
+
+  if(sorted.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = sorted.map((e,i) => `
+    <li class="rank-${i+1}">
+      <span class="rank">${i+1}</span>
+      <span class="pname">${escapeHtml(e.name)}</span>
+      <span class="pscore">${e.score}</span>
+    </li>`).join('');
+}
+
+function renderSessionLog(items){
+  const list = document.getElementById('session-log-list');
+  const empty = document.getElementById('session-log-empty');
+  if(items.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = items.map(e => `
+    <li><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></li>
+  `).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str==null ? '' : String(str);
+  return d.innerHTML;
+}
+
+async function submitScore(){
+  const warn = document.getElementById('session-warn');
+  warn.textContent = '';
+  const key = currentChallengeKey();
+  if(!session.code || !key){ warn.textContent = 'Erst einer Session beitreten und eine Challenge würfeln.'; return; }
+
+  const nameInput = document.getElementById('player-name-input');
+  const scoreInput = document.getElementById('score-input');
+  const name = nameInput.value.trim();
+  const score = parseFloat(scoreInput.value);
+
+  if(!name){ warn.textContent = 'Bitte einen Namen eingeben.'; return; }
+  if(isNaN(score)){ warn.textContent = 'Bitte ein gültiges Ergebnis eingeben.'; return; }
+
+  localStorage.setItem('fh6-player-name', name);
+  const submitBtn = document.getElementById('submit-score-btn');
+  submitBtn.disabled = true;
+
+  try{
+    await db.collection('sessions').doc(session.code).collection('entries').add({
+      name, score,
+      event: key.event, cls: key.cls, rule: key.rule,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    scoreInput.value = '';
+  }catch(e){
+    console.error(e);
+    warn.textContent = 'Eintragen fehlgeschlagen, bitte nochmal versuchen.';
+  }
+  submitBtn.disabled = !currentChallengeKey();
+}
+
+document.getElementById('join-session-btn').addEventListener('click', ()=>{
+  joinSession(document.getElementById('session-code-input').value);
+});
+document.getElementById('session-code-input').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') joinSession(e.target.value);
+});
+document.getElementById('new-session-btn').addEventListener('click', ()=>{
+  joinSession(generateSessionCode());
+});
+document.getElementById('leave-session-btn').addEventListener('click', leaveSession);
+document.getElementById('submit-score-btn').addEventListener('click', submitScore);
+document.getElementById('sort-toggle-btn').addEventListener('click', ()=>{
+  session.sortDesc = !session.sortDesc;
+  document.getElementById('sort-toggle-btn').textContent = session.sortDesc ? '↕ Höher gewinnt' : '↕ Niedriger gewinnt';
+  renderLeaderboard();
+});
+
+// Auto-rejoin a session if one was active on this device.
+(function restoreSession(){
+  const savedCode = localStorage.getItem('fh6-session-code');
+  if(savedCode) joinSession(savedCode);
 })();
 
 if('serviceWorker' in navigator){
