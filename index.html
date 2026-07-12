@@ -336,6 +336,13 @@
   #leaderboard-list li .pscore{font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:700;}
   #leaderboard-empty{color:var(--ink-dim);font-size:13px;font-style:italic;}
 
+  .del-entry-btn{
+    flex:none;background:transparent;border:1px solid var(--line);border-radius:7px;
+    color:var(--ink-dim);width:24px;height:24px;line-height:1;cursor:pointer;
+    font-size:13px;transition:border-color .15s ease, color .15s ease;
+  }
+  .del-entry-btn:hover{border-color:var(--red);color:var(--red);}
+
   #session-log-list{
     list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;
     max-height:260px;overflow-y:auto;
@@ -1395,7 +1402,7 @@ function attachSessionListeners(){
   session.unsubLog = db.collection('sessions').doc(session.code).collection('entries')
     .orderBy('timestamp','desc').limit(500)
     .onSnapshot(snap => {
-      const items = snap.docs.map(d => d.data());
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       session.lastEntries = items;
       renderSessionLog(items);
       renderStandings(items);
@@ -1429,7 +1436,7 @@ function updateSessionForCurrentChallenge(){
   session.unsubCurrent = db.collection('sessions').doc(session.code).collection('entries')
     .where('event','==',key.event).where('cls','==',key.cls).where('rule','==',key.rule)
     .onSnapshot(snap => {
-      session.currentDocs = snap.docs.map(d => d.data());
+      session.currentDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderLeaderboard();
     }, err => {
       console.error('Leaderboard listener error:', err);
@@ -1454,6 +1461,7 @@ function renderLeaderboard(){
       <span class="rank">${i+1}</span>
       <span class="pname">${escapeHtml(e.name)}</span>
       <span class="pscore">${e.score}</span>
+      ${e.deviceId === getDeviceId() ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
     </li>`).join('');
 }
 
@@ -1467,9 +1475,41 @@ function renderSessionLog(items){
   }
   empty.style.display = 'none';
   list.innerHTML = items.map(e => `
-    <li><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></li>
+    <li>
+      <span><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></span>
+      ${e.deviceId === getDeviceId() ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
+    </li>
   `).join('');
 }
+
+function getDeviceId(){
+  let id = localStorage.getItem('fh6-device-id');
+  if(!id){
+    id = 'dev-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    localStorage.setItem('fh6-device-id', id);
+  }
+  return id;
+}
+
+async function deleteEntry(entryId){
+  if(!session.code || !entryId) return;
+  try{
+    await db.collection('sessions').doc(session.code).collection('entries').doc(entryId).delete();
+  }catch(e){
+    console.error('deleteEntry failed:', e);
+  }
+}
+
+// Event delegation: catches clicks on delete buttons in either list, even
+// after they're re-rendered by onSnapshot updates.
+document.getElementById('leaderboard-list').addEventListener('click', e=>{
+  const btn = e.target.closest('.del-entry-btn');
+  if(btn) deleteEntry(btn.dataset.id);
+});
+document.getElementById('session-log-list').addEventListener('click', e=>{
+  const btn = e.target.closest('.del-entry-btn');
+  if(btn) deleteEntry(btn.dataset.id);
+});
 
 // Points rule: within each distinct challenge (event+class+rule), the worst
 // result gets 0 points and each place above it gets one point more. Equal
@@ -1556,6 +1596,7 @@ async function submitScore(){
     await db.collection('sessions').doc(session.code).collection('entries').add({
       name, score,
       event: key.event, cls: key.cls, rule: key.rule,
+      deviceId: getDeviceId(),
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     scoreInput.value = '';
