@@ -1280,24 +1280,10 @@ document.getElementById('dismiss-shared').addEventListener('click', ()=>{
   document.getElementById('shared-banner').style.display = 'none';
 });
 
-// If this page was opened via a shared challenge link, load it and clean the URL.
-(function loadSharedChallengeFromUrl(){
-  const params = new URLSearchParams(window.location.search);
-  const hasChallenge = params.has('race') && params.has('cls');
-  const sessionParam = params.get('s');
+// If this page was opened via a shared challenge link, load it and clean the
+// URL. NOTE: this must run after `session` (below) is initialized, since it
+// may call joinSession() — see the relocated call further down.
 
-  if(hasChallenge){
-    applyChallengeStatic(params.get('race'), params.get('cls'), params.get('rule'), { showBanner: !sessionParam });
-  }
-  if(sessionParam){
-    joinSession(sessionParam);
-    switchTab('session', { scroll:false });
-  }
-  if(hasChallenge || sessionParam){
-    const cleanUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, '', cleanUrl);
-  }
-})();
 
 // ---- Session Leaderboard (Firebase) ----
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no O/0, I/1 to avoid mix-ups
@@ -1666,6 +1652,26 @@ document.getElementById('podium-close-btn').addEventListener('click', ()=>{
 (function restoreSession(){
   const savedCode = localStorage.getItem('fh6-session-code');
   if(savedCode) joinSession(savedCode);
+})();
+
+// Now that session handling is fully initialized, it's safe to process a
+// shared link (may itself call joinSession()).
+(function loadSharedChallengeFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const hasChallenge = params.has('race') && params.has('cls');
+  const sessionParam = params.get('s');
+
+  if(hasChallenge){
+    applyChallengeStatic(params.get('race'), params.get('cls'), params.get('rule'), { showBanner: !sessionParam });
+  }
+  if(sessionParam){
+    joinSession(sessionParam);
+    switchTab('session', { scroll:false });
+  }
+  if(hasChallenge || sessionParam){
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+  }
 })();
 
 // ---- Tabs ----
