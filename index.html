@@ -69,6 +69,29 @@
   }
   .sub{color:var(--ink-dim);font-size:16px;margin:0 0 30px;max-width:60ch;}
 
+  .tab-nav{
+    display:flex;gap:6px;margin-bottom:22px;
+    background:var(--bg-1);border:1px solid var(--line);border-radius:14px;
+    padding:6px;position:sticky;top:12px;z-index:60;
+    box-shadow:0 12px 30px -14px rgba(0,0,0,.6);
+    overflow-x:auto;
+  }
+  .tab-btn{
+    flex:1;min-width:max-content;
+    background:transparent;border:none;border-radius:10px;
+    padding:10px 14px;cursor:pointer;
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;
+    color:var(--ink-dim);white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .tab-btn.active{
+    background:linear-gradient(90deg,var(--orange-2),var(--orange));
+    color:#0a0e18;
+  }
+  .tab-btn:hover:not(.active){color:var(--ink);}
+  .tab-panel{animation:tab-fade .18s ease;}
+  @keyframes tab-fade{ from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
   .shared-banner{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     background:linear-gradient(90deg, rgba(0,224,198,.14), rgba(139,59,240,.14));
@@ -430,6 +453,14 @@
     <button class="ghost-btn" id="dismiss-shared">Ok</button>
   </div>
 
+  <div class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" data-tab="challenge">🎲 Challenge</button>
+    <button class="tab-btn" data-tab="session">🏆 Session</button>
+    <button class="tab-btn" data-tab="history">📜 Verlauf</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+  </div>
+
+  <div class="tab-panel" data-tab-panel="challenge">
   <div class="card">
     <div class="shiftlights" id="shiftlights"></div>
 
@@ -465,7 +496,9 @@
     </div>
     <div class="warn" id="warn-msg"></div>
   </div>
+  </div>
 
+  <div class="tab-panel" data-tab-panel="session" style="display:none;">
   <div class="card session-card" id="session-card">
     <div class="session-header"><h2>🏆 Session-Leaderboard</h2></div>
 
@@ -518,7 +551,17 @@
       </div>
     </div>
   </div>
+  </div>
 
+  <div class="tab-panel" data-tab-panel="history" style="display:none;">
+  <div class="history">
+    <h3>Verlauf <button id="clear-hist">Verlauf löschen</button></h3>
+    <ul id="hist-list"></ul>
+    <p id="hist-empty">Noch keine Challenge gestartet.</p>
+  </div>
+  </div>
+
+  <div class="tab-panel" data-tab-panel="settings" style="display:none;">
   <div class="filters">
     <div class="filter-group">
       <h3>Events im Pool</h3>
@@ -542,11 +585,6 @@
     <input type="checkbox" id="no-repeat" checked>
     Keine direkte Wiederholung der letzten Kombination
   </label>
-
-  <div class="history">
-    <h3>Verlauf <button id="clear-hist">Verlauf löschen</button></h3>
-    <ul id="hist-list"></ul>
-    <p id="hist-empty">Noch keine Challenge gestartet.</p>
   </div>
 
 </div>
@@ -1611,6 +1649,28 @@ document.getElementById('podium-close-btn').addEventListener('click', ()=>{
 (function restoreSession(){
   const savedCode = localStorage.getItem('fh6-session-code');
   if(savedCode) joinSession(savedCode);
+})();
+
+// ---- Tabs ----
+function switchTab(tabName, opts={}){
+  const { scroll=true } = opts;
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.style.display = (p.dataset.tabPanel === tabName) ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  localStorage.setItem('fh6-active-tab', tabName);
+  if(scroll) document.getElementById('tab-nav').scrollIntoView({ block:'start', behavior:'smooth' });
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+});
+(function restoreTab(){
+  const saved = localStorage.getItem('fh6-active-tab');
+  if(saved && document.querySelector(`.tab-panel[data-tab-panel="${saved}"]`)){
+    switchTab(saved, { scroll:false });
+  }
 })();
 
 if('serviceWorker' in navigator){
