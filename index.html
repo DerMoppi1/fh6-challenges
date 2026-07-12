@@ -1196,6 +1196,7 @@ function buildShareUrl(){
   params.set('race', state.last.race);
   params.set('cls', state.last.cls);
   if(state.last.rule) params.set('rule', state.last.rule);
+  if(session.code) params.set('s', session.code);
   const url = new URL(window.location.href);
   url.search = params.toString();
   return url.toString();
@@ -1254,8 +1255,15 @@ function applySharedChallenge(raceName, clsName, ruleName){
 document.getElementById('share-btn').addEventListener('click', async ()=>{
   const url = buildShareUrl();
   if(!url || !state.last) return;
-  const text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}${state.last.rule ? ' · '+state.last.rule : ''}`;
-  if(navigator.share){
+  const text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}${state.last.rule ? ' · '+state.last.rule : ''}`
+    + (session.code ? `\nSession-Code: ${session.code}` : '');
+
+  // The native share sheet is flaky/crash-prone on some desktop Chrome builds
+  // (RESULT_CODE_KILLED_BAD_MESSAGE). Only use it on touch devices, where
+  // it's reliable and the better UX; desktop always falls back to clipboard.
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+  if(navigator.share && isTouchDevice){
     try{ await navigator.share({ title:'FH6 Challenge', text, url }); }catch(e){ /* user cancelled, ignore */ }
   } else {
     try{
@@ -1275,8 +1283,17 @@ document.getElementById('dismiss-shared').addEventListener('click', ()=>{
 // If this page was opened via a shared challenge link, load it and clean the URL.
 (function loadSharedChallengeFromUrl(){
   const params = new URLSearchParams(window.location.search);
-  if(params.has('race') && params.has('cls')){
-    applySharedChallenge(params.get('race'), params.get('cls'), params.get('rule'));
+  const hasChallenge = params.has('race') && params.has('cls');
+  const sessionParam = params.get('s');
+
+  if(hasChallenge){
+    applyChallengeStatic(params.get('race'), params.get('cls'), params.get('rule'), { showBanner: !sessionParam });
+  }
+  if(sessionParam){
+    joinSession(sessionParam);
+    switchTab('session', { scroll:false });
+  }
+  if(hasChallenge || sessionParam){
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, '', cleanUrl);
   }
