@@ -620,6 +620,7 @@
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -632,6 +633,18 @@ const firebaseConfig = {
   appId: "1:277586777695:web:1d1d4ffc97ec3548d3adea"
 };
 firebase.initializeApp(firebaseConfig);
+
+// App Check: blocks automated/bot traffic from hitting Firestore directly,
+// bypassing the app. Requires a reCAPTCHA v3 site key registered in both
+// the reCAPTCHA admin console and Firebase Console → App Check.
+// TODO: replace with your real reCAPTCHA v3 site key.
+const RECAPTCHA_SITE_KEY = "6LeBllstAAAAAM_DglpfnuW424F_wygCEbJHWfxf";
+if(RECAPTCHA_SITE_KEY && !RECAPTCHA_SITE_KEY.startsWith("PASTE_")){
+  firebase.appCheck().activate(RECAPTCHA_SITE_KEY, true);
+} else {
+  console.warn('App Check not active: RECAPTCHA_SITE_KEY not set yet.');
+}
+
 const db = firebase.firestore();
 
 // Anonymous auth gives each browser a real, server-verified identity (unlike
