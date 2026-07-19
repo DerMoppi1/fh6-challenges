@@ -599,7 +599,7 @@
 <div class="overlay" id="confirm-overlay" style="display:none;">
   <div class="overlay-box">
     <h3>Session wirklich beenden?</h3>
-    <p>Die aktuelle Rangliste wird als Abschluss gezeigt, danach verlässt du die Session. Die Daten bleiben aber in der Cloud erhalten, ihr könnt mit demselben Code später weitermachen.</p>
+    <p>Die Session wird für <b>alle</b> beendet – niemand kann dem Code danach noch beitreten, und alle, die noch aktiv sind, werden rausgeworfen. Die aktuelle Rangliste wird als Abschluss gezeigt. Die Daten bleiben zur Sicherheit trotzdem in der Cloud erhalten.</p>
     <div class="overlay-actions">
       <button class="ghost-btn" id="confirm-cancel-btn">Abbrechen</button>
       <button class="cta-small danger-btn-solid" id="confirm-ok-btn">Ja, beenden</button>
@@ -1328,6 +1328,7 @@ const session = {
   unsubChallenge: null,
   currentDocs: [],
   lastEntries: [],
+  selfEnded: false,
 };
 
 async function broadcastChallengeToSession(){
@@ -1349,7 +1350,16 @@ function listenSessionChallenge(){
   session.unsubChallenge = db.collection('sessions').doc(session.code)
     .onSnapshot(doc => {
       const data = doc.data();
-      if(!data || !data.event || !data.cls) return;
+      if(!data) return;
+
+      if(data.ended === true){
+        if(session.selfEnded) return; // we triggered this ourselves, podium flow handles it
+        document.getElementById('session-join-warn').textContent = 'Diese Session wurde beendet.';
+        leaveSession();
+        return;
+      }
+
+      if(!data.event || !data.cls) return;
       const incomingRule = data.rule || '';
       const localRule = (state.last && state.last.rule) || '';
       const alreadyShowingThis = state.last && state.last.race === data.event
@@ -1380,13 +1390,26 @@ async function generateUniqueSessionCode(){
   return generateSessionCode() + Math.floor(Math.random()*10);
 }
 
-function joinSession(code){
+async function joinSession(code){
   code = normalizeCode(code);
   if(code.length < 4){
     document.getElementById('session-join-warn').textContent = 'Bitte einen gültigen Code eingeben (mind. 4 Zeichen).';
     return;
   }
+
+  document.getElementById('session-join-warn').textContent = '';
+  try{
+    const docSnap = await db.collection('sessions').doc(code).get();
+    if(docSnap.exists && docSnap.data().ended === true){
+      document.getElementById('session-join-warn').textContent = 'Diese Session wurde bereits beendet. Bitte einen anderen Code verwenden.';
+      return;
+    }
+  }catch(e){
+    console.error('Session lookup failed:', e);
+  }
+
   session.code = code;
+  session.selfEnded = false;
   localStorage.setItem('fh6-session-code', code);
 
   document.getElementById('session-join').style.display = 'none';
@@ -1408,6 +1431,7 @@ function leaveSession(){
   if(session.unsubChallenge) session.unsubChallenge();
   session.code = null;
   session.currentDocs = [];
+  session.selfEnded = false;
   localStorage.removeItem('fh6-session-code');
 
   document.getElementById('session-join').style.display = 'block';
@@ -1693,6 +1717,16 @@ document.getElementById('end-session-btn').addEventListener('click', async ()=>{
   const standings = computeSessionStandings(session.lastEntries);
   renderPodium(standings);
   document.getElementById('podium-overlay').style.display = 'flex';
+
+  session.selfEnded = true;
+  try{
+    await db.collection('sessions').doc(session.code).set({
+      ended: true,
+      endedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true });
+  }catch(e){
+    console.error('Failed to mark session as ended:', e);
+  }
 });
 
 document.getElementById('podium-close-btn').addEventListener('click', ()=>{
