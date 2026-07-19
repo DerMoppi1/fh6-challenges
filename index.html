@@ -620,6 +620,7 @@
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
@@ -632,6 +633,23 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+// Anonymous auth gives each browser a real, server-verified identity (unlike
+// the old localStorage device-id trick), so Firestore rules can actually
+// enforce "only delete your own entries" once the app is public.
+let currentUid = null;
+const authReady = new Promise(resolve => {
+  firebase.auth().onAuthStateChanged(user => {
+    if(user){
+      currentUid = user.uid;
+      resolve(user.uid);
+      // Re-render anything that depends on ownership once we know who we are.
+      if(typeof renderLeaderboard === 'function') renderLeaderboard();
+      if(typeof renderSessionLog === 'function' && session.lastEntries) renderSessionLog(session.lastEntries);
+    }
+  });
+  firebase.auth().signInAnonymously().catch(err => console.error('Anonymous sign-in failed:', err));
+});
 function iconSpeedTrap(){
   return `<svg class="ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="4" y="7" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/>
@@ -1461,7 +1479,7 @@ function renderLeaderboard(){
       <span class="rank">${i+1}</span>
       <span class="pname">${escapeHtml(e.name)}</span>
       <span class="pscore">${e.score}</span>
-      ${e.deviceId === getDeviceId() ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
+      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
     </li>`).join('');
 }
 
@@ -1477,18 +1495,9 @@ function renderSessionLog(items){
   list.innerHTML = items.map(e => `
     <li>
       <span><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></span>
-      ${e.deviceId === getDeviceId() ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
+      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
     </li>
   `).join('');
-}
-
-function getDeviceId(){
-  let id = localStorage.getItem('fh6-device-id');
-  if(!id){
-    id = 'dev-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-    localStorage.setItem('fh6-device-id', id);
-  }
-  return id;
 }
 
 async function deleteEntry(entryId){
@@ -1587,16 +1596,18 @@ async function submitScore(){
 
   if(!name){ warn.textContent = 'Bitte einen Namen eingeben.'; return; }
   if(isNaN(score)){ warn.textContent = 'Bitte ein gültiges Ergebnis eingeben.'; return; }
+  if(Math.abs(score) >= 1000000){ warn.textContent = 'Das Ergebnis wirkt unrealistisch groß, bitte prüfen.'; return; }
 
   localStorage.setItem('fh6-player-name', name);
   const submitBtn = document.getElementById('submit-score-btn');
   submitBtn.disabled = true;
 
   try{
+    await authReady;
     await db.collection('sessions').doc(session.code).collection('entries').add({
       name, score,
       event: key.event, cls: key.cls, rule: key.rule,
-      deviceId: getDeviceId(),
+      ownerUid: currentUid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     scoreInput.value = '';
