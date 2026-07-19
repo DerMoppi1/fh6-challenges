@@ -69,6 +69,15 @@
   }
   .sub{color:var(--ink-dim);font-size:16px;margin:0 0 30px;max-width:60ch;}
 
+  .lang-switch{display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px;}
+  .lang-btn{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:999px;
+    padding:5px 12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;
+    color:var(--ink-dim);cursor:pointer;transition:border-color .15s ease, color .15s ease;
+  }
+  .lang-btn.active{border-color:var(--orange-2);color:var(--ink);background:rgba(255,95,31,.1);}
+  .lang-btn:hover:not(.active){color:var(--ink);}
+
   .tab-nav{
     display:flex;gap:6px;margin-bottom:22px;
     background:var(--bg-1);border:1px solid var(--line);border-radius:14px;
@@ -451,20 +460,24 @@
 <div class="wrap">
 
   <div class="stripe"></div>
-  <p class="eyebrow">Horizon Festival &middot; Zufallsgenerator</p>
+  <div class="lang-switch" id="lang-switch">
+    <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
+    <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+  </div>
+  <p class="eyebrow" data-i18n="eyebrow">Horizon Festival &middot; Zufallsgenerator</p>
   <h1>Challenge Generator</h1>
-  <p class="sub">Ein Dreh entscheidet: zufälliges Event + Autoklasse. Stell dich der Kombination, egal wie schräg sie ist.</p>
+  <p class="sub" data-i18n="subtitle">Ein Dreh entscheidet: zufälliges Event + Autoklasse. Stell dich der Kombination, egal wie schräg sie ist.</p>
 
   <div class="shared-banner" id="shared-banner" style="display:none;">
-    <span>📨 Mit dir geteilte Challenge – wurde unten eingetragen.</span>
-    <button class="ghost-btn" id="dismiss-shared">Ok</button>
+    <span data-i18n="sharedBannerText">📨 Mit dir geteilte Challenge – wurde unten eingetragen.</span>
+    <button class="ghost-btn" id="dismiss-shared" data-i18n="ok">Ok</button>
   </div>
 
   <div class="tab-nav" id="tab-nav">
-    <button class="tab-btn active" data-tab="challenge">🎲 Challenge</button>
-    <button class="tab-btn" data-tab="session">🏆 Session</button>
-    <button class="tab-btn" data-tab="history">📜 Verlauf</button>
-    <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+    <button class="tab-btn active" data-tab="challenge">🎲 <span data-i18n="tabChallenge">Challenge</span></button>
+    <button class="tab-btn" data-tab="session">🏆 <span data-i18n="tabSession">Session</span></button>
+    <button class="tab-btn" data-tab="history">📜 <span data-i18n="tabHistory">Verlauf</span></button>
+    <button class="tab-btn" data-tab="settings">⚙️ <span data-i18n="tabSettings">Einstellungen</span></button>
   </div>
 
   <div class="tab-panel" data-tab-panel="challenge">
@@ -473,33 +486,33 @@
 
     <div class="reels" id="reels-grid">
       <div class="reel-box">
-        <div class="reel-label">Event</div>
+        <div class="reel-label" data-i18n="event">Event</div>
         <div class="reel-window"><div class="reel-track" id="track-race"></div></div>
       </div>
       <div class="reel-box">
-        <div class="reel-label">Autoklasse</div>
+        <div class="reel-label" data-i18n="carClass">Autoklasse</div>
         <div class="reel-window"><div class="reel-track" id="track-class"></div></div>
       </div>
       <div class="reel-box" id="rule-reel-box">
-        <div class="reel-label">Zusatzregel</div>
+        <div class="reel-label" data-i18n="extraRule">Zusatzregel</div>
         <div class="reel-window"><div class="reel-track" id="track-rule"></div></div>
       </div>
     </div>
 
-    <div class="cta-row"><button id="go-btn">Challenge starten</button></div>
-    <div class="result-line" id="result-line">Bereit für den ersten Dreh.</div>
+    <div class="cta-row"><button id="go-btn" data-i18n="startChallenge">Challenge starten</button></div>
+    <div class="result-line" id="result-line" data-i18n="readyForFirstSpin">Bereit für den ersten Dreh.</div>
 
     <div class="car-suggestions" id="car-suggestions" style="display:none;">
       <div class="car-suggestions-head">
         <span id="car-suggestions-label">Vorschläge für Klasse</span>
-        <button class="ghost-btn" id="reroll-cars-btn">Andere Vorschläge</button>
+        <button class="ghost-btn" id="reroll-cars-btn" data-i18n="otherSuggestions">Andere Vorschläge</button>
       </div>
       <div class="car-chip-list" id="car-chip-list"></div>
     </div>
 
     <div class="actions-row">
-      <button class="ghost-btn" id="copy-btn">Ergebnis kopieren</button>
-      <button class="ghost-btn" id="share-btn">Challenge teilen</button>
+      <button class="ghost-btn" id="copy-btn" data-i18n="copyResult">Ergebnis kopieren</button>
+      <button class="ghost-btn" id="share-btn" data-i18n="shareChallenge">Challenge teilen</button>
     </div>
     <div class="warn" id="warn-msg"></div>
   </div>
@@ -507,54 +520,54 @@
 
   <div class="tab-panel" data-tab-panel="session" style="display:none;">
   <div class="card session-card" id="session-card">
-    <div class="session-header"><h2>🏆 Session-Leaderboard</h2></div>
+    <div class="session-header"><h2>🏆 <span data-i18n="sessionLeaderboard">Session-Leaderboard</span></h2></div>
 
     <div id="session-join">
-      <p class="session-hint">Tritt dem Code eures heutigen Abends bei, oder starte einen neuen.</p>
+      <p class="session-hint" data-i18n="sessionHint">Tritt dem Code eures heutigen Abends bei, oder starte einen neuen.</p>
       <div class="session-join-row">
-        <input type="text" id="session-code-input" maxlength="6" placeholder="CODE eingeben" autocapitalize="characters">
-        <button class="cta-small" id="join-session-btn">Beitreten</button>
+        <input type="text" id="session-code-input" maxlength="6" placeholder="CODE eingeben" data-i18n-placeholder="enterCode" autocapitalize="characters">
+        <button class="cta-small" id="join-session-btn" data-i18n="join">Beitreten</button>
       </div>
-      <button class="ghost-btn" id="new-session-btn">Neue Session starten</button>
+      <button class="ghost-btn" id="new-session-btn" data-i18n="newSession">Neue Session starten</button>
       <p class="warn" id="session-join-warn"></p>
     </div>
 
     <div id="session-active" style="display:none;">
       <div class="session-active-head">
         <div>
-          <span class="session-code-label">Session-Code</span>
+          <span class="session-code-label" data-i18n="sessionCode">Session-Code</span>
           <span class="session-code-value" id="session-code-display"></span>
         </div>
-        <button class="ghost-btn" id="leave-session-btn">Verlassen</button>
-        <button class="ghost-btn danger-btn" id="end-session-btn">Session beenden</button>
+        <button class="ghost-btn" id="leave-session-btn" data-i18n="leave">Verlassen</button>
+        <button class="ghost-btn danger-btn" id="end-session-btn" data-i18n="endSession">Session beenden</button>
       </div>
 
       <div class="score-submit">
-        <input type="text" id="player-name-input" placeholder="Dein Name" maxlength="24">
-        <input type="number" id="score-input" placeholder="Ergebnis (Zeit, Punkte, Meter...)" step="0.01">
-        <button class="cta-small" id="submit-score-btn">Eintragen</button>
+        <input type="text" id="player-name-input" placeholder="Dein Name" data-i18n-placeholder="yourName" maxlength="24">
+        <input type="number" id="score-input" placeholder="Ergebnis (Zeit, Punkte, Meter...)" data-i18n-placeholder="resultPlaceholder" step="0.01">
+        <button class="cta-small" id="submit-score-btn" data-i18n="submit">Eintragen</button>
       </div>
       <p class="warn" id="session-warn"></p>
 
       <div class="leaderboard-block">
         <div class="leaderboard-head">
-          <span id="leaderboard-title">Bestenliste – erst eine Challenge würfeln</span>
+          <span id="leaderboard-title" data-i18n="leaderboardWaiting">Bestenliste – erst eine Challenge würfeln</span>
           <span class="dir-badge" id="dir-badge"></span>
         </div>
         <ol id="leaderboard-list"></ol>
-        <p id="leaderboard-empty">Noch keine Einträge für diese Challenge.</p>
+        <p id="leaderboard-empty" data-i18n="leaderboardEmpty">Noch keine Einträge für diese Challenge.</p>
       </div>
 
       <div class="leaderboard-block">
-        <div class="leaderboard-head"><span>Gesamtwertung der Session</span></div>
+        <div class="leaderboard-head"><span data-i18n="overallStandings">Gesamtwertung der Session</span></div>
         <ol id="standings-list"></ol>
-        <p id="standings-empty">Noch keine Punkte vergeben – erst ein paar Challenges eintragen.</p>
+        <p id="standings-empty" data-i18n="standingsEmpty">Noch keine Punkte vergeben – erst ein paar Challenges eintragen.</p>
       </div>
 
       <div class="leaderboard-block">
-        <div class="leaderboard-head"><span>Session-Verlauf (alle Einträge heute)</span></div>
+        <div class="leaderboard-head"><span data-i18n="sessionLogTitle">Session-Verlauf (alle Einträge heute)</span></div>
         <ul id="session-log-list"></ul>
-        <p id="session-log-empty">Noch nichts eingetragen.</p>
+        <p id="session-log-empty" data-i18n="nothingEnteredYet">Noch nichts eingetragen.</p>
       </div>
     </div>
   </div>
@@ -562,35 +575,35 @@
 
   <div class="tab-panel" data-tab-panel="history" style="display:none;">
   <div class="history">
-    <h3>Verlauf <button id="clear-hist">Verlauf löschen</button></h3>
+    <h3><span data-i18n="historyTitle">Verlauf</span> <button id="clear-hist" data-i18n="clearHistory">Verlauf löschen</button></h3>
     <ul id="hist-list"></ul>
-    <p id="hist-empty">Noch keine Challenge gestartet.</p>
+    <p id="hist-empty" data-i18n="noChallengeYet">Noch keine Challenge gestartet.</p>
   </div>
   </div>
 
   <div class="tab-panel" data-tab-panel="settings" style="display:none;">
   <div class="filters">
     <div class="filter-group">
-      <h3>Events im Pool</h3>
+      <h3 data-i18n="eventsInPool">Events im Pool</h3>
       <div class="chk-list" id="race-filters"></div>
     </div>
     <div class="filter-group">
-      <h3>Autoklassen im Pool</h3>
+      <h3 data-i18n="classesInPool">Autoklassen im Pool</h3>
       <div class="chk-list" id="class-filters"></div>
     </div>
     <div class="filter-group" id="rule-filter-group">
-      <h3>Zusatzregeln im Pool</h3>
+      <h3 data-i18n="rulesInPool">Zusatzregeln im Pool</h3>
       <div class="chk-list" id="rule-filters"></div>
     </div>
   </div>
 
   <label class="toggle-row">
     <input type="checkbox" id="rules-enabled" checked>
-    Zusatzregeln aktivieren
+    <span data-i18n="enableRules">Zusatzregeln aktivieren</span>
   </label>
   <label class="toggle-row">
     <input type="checkbox" id="no-repeat" checked>
-    Keine direkte Wiederholung der letzten Kombination
+    <span data-i18n="noRepeat">Keine direkte Wiederholung der letzten Kombination</span>
   </label>
   </div>
 
@@ -598,23 +611,23 @@
 
 <div class="overlay" id="confirm-overlay" style="display:none;">
   <div class="overlay-box">
-    <h3>Session wirklich beenden?</h3>
-    <p>Die Session wird für <b>alle</b> beendet – niemand kann dem Code danach noch beitreten, und alle, die noch aktiv sind, werden rausgeworfen. Die aktuelle Rangliste wird als Abschluss gezeigt. Die Daten bleiben zur Sicherheit trotzdem in der Cloud erhalten.</p>
+    <h3 data-i18n="confirmEndTitle">Session wirklich beenden?</h3>
+    <p data-i18n-html="confirmEndBody">Die Session wird für <b>alle</b> beendet – niemand kann dem Code danach noch beitreten, und alle, die noch aktiv sind, werden rausgeworfen. Die aktuelle Rangliste wird als Abschluss gezeigt. Die Daten bleiben zur Sicherheit trotzdem in der Cloud erhalten.</p>
     <div class="overlay-actions">
-      <button class="ghost-btn" id="confirm-cancel-btn">Abbrechen</button>
-      <button class="cta-small danger-btn-solid" id="confirm-ok-btn">Ja, beenden</button>
+      <button class="ghost-btn" id="confirm-cancel-btn" data-i18n="cancel">Abbrechen</button>
+      <button class="cta-small danger-btn-solid" id="confirm-ok-btn" data-i18n="yesEnd">Ja, beenden</button>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="podium-overlay" style="display:none;">
   <div class="overlay-box podium-box">
-    <p class="eyebrow" style="text-align:center;">Session beendet</p>
-    <h3 style="text-align:center;">🏁 Endstand</h3>
+    <p class="eyebrow" style="text-align:center;" data-i18n="sessionEnded">Session beendet</p>
+    <h3 style="text-align:center;">🏁 <span data-i18n="finalStandings">Endstand</span></h3>
     <div class="podium" id="podium-stage"></div>
     <div id="podium-rest"></div>
     <div class="overlay-actions" style="justify-content:center;margin-top:20px;">
-      <button class="cta-small" id="podium-close-btn">Schließen & Session verlassen</button>
+      <button class="cta-small" id="podium-close-btn" data-i18n="closeAndLeave">Schließen & Session verlassen</button>
     </div>
   </div>
 </div>
@@ -646,6 +659,242 @@ if(RECAPTCHA_SITE_KEY && !RECAPTCHA_SITE_KEY.startsWith("PASTE_")){
 }
 
 const db = firebase.firestore();
+
+// ============================================================
+// i18n — display-only translation layer.
+// IMPORTANT: German event/rule/car-type names remain the canonical
+// values stored in Firestore and used as data-name attributes/lookup
+// keys everywhere. Only what's shown on screen changes with language.
+// ============================================================
+const I18N = {
+  de: {
+    eyebrow: "Horizon Festival &middot; Zufallsgenerator",
+    subtitle: "Ein Dreh entscheidet: zufälliges Event + Autoklasse. Stell dich der Kombination, egal wie schräg sie ist.",
+    sharedBannerText: "📨 Mit dir geteilte Challenge – wurde unten eingetragen.",
+    ok: "Ok",
+    tabChallenge: "Challenge",
+    tabSession: "Session",
+    tabHistory: "Verlauf",
+    tabSettings: "Einstellungen",
+    event: "Event",
+    carClass: "Autoklasse",
+    extraRule: "Zusatzregel",
+    startChallenge: "Challenge starten",
+    readyForFirstSpin: "Bereit für den ersten Dreh.",
+    spinning: "Motor läuft...",
+    currentChallenge: "Aktuelle Challenge:",
+    classWord: "Klasse",
+    otherSuggestions: "Andere Vorschläge",
+    copyResult: "Ergebnis kopieren",
+    copied: "Kopiert!",
+    linkCopied: "Link kopiert!",
+    shareChallenge: "Challenge teilen",
+    suggestionsFor: "Vorschläge für Klasse",
+    typeWord: "Typ",
+    sessionLeaderboard: "Session-Leaderboard",
+    sessionHint: "Tritt dem Code eures heutigen Abends bei, oder starte einen neuen.",
+    enterCode: "CODE eingeben",
+    join: "Beitreten",
+    newSession: "Neue Session starten",
+    sessionCode: "Session-Code",
+    leave: "Verlassen",
+    endSession: "Session beenden",
+    yourName: "Dein Name",
+    resultPlaceholder: "Ergebnis (Zeit, Punkte, Meter...)",
+    submit: "Eintragen",
+    leaderboardWaiting: "Bestenliste – erst eine Challenge würfeln",
+    leaderboardTitle: "Bestenliste –",
+    leaderboardEmpty: "Noch keine Einträge für diese Challenge.",
+    overallStandings: "Gesamtwertung der Session",
+    standingsEmpty: "Noch keine Punkte vergeben – erst ein paar Challenges eintragen.",
+    sessionLogTitle: "Session-Verlauf (alle Einträge heute)",
+    nothingEnteredYet: "Noch nichts eingetragen.",
+    higherWins: "höher gewinnt",
+    lowerWins: "niedriger gewinnt",
+    round: "Runde",
+    rounds: "Runden",
+    points: "Pkt.",
+    deleteOwnEntry: "Eigenen Eintrag löschen",
+    historyTitle: "Verlauf",
+    clearHistory: "Verlauf löschen",
+    noChallengeYet: "Noch keine Challenge gestartet.",
+    eventsInPool: "Events im Pool",
+    classesInPool: "Autoklassen im Pool",
+    rulesInPool: "Zusatzregeln im Pool",
+    enableRules: "Zusatzregeln aktivieren",
+    noRepeat: "Keine direkte Wiederholung der letzten Kombination",
+    confirmEndTitle: "Session wirklich beenden?",
+    confirmEndBody: "Die Session wird für <b>alle</b> beendet – niemand kann dem Code danach noch beitreten, und alle, die noch aktiv sind, werden rausgeworfen. Die aktuelle Rangliste wird als Abschluss gezeigt. Die Daten bleiben zur Sicherheit trotzdem in der Cloud erhalten.",
+    cancel: "Abbrechen",
+    yesEnd: "Ja, beenden",
+    sessionEnded: "Session beendet",
+    finalStandings: "Endstand",
+    closeAndLeave: "Schließen & Session verlassen",
+    noResultsEntered: "Es wurden keine Ergebnisse eingetragen.",
+    warnMinCodeLength: "Bitte einen gültigen Code eingeben (mind. 4 Zeichen).",
+    warnSessionEnded: "Diese Session wurde bereits beendet. Bitte einen anderen Code verwenden.",
+    warnSessionEndedLive: "Diese Session wurde beendet.",
+    warnCodeGenFailed: "Code-Erstellung fehlgeschlagen, bitte nochmal versuchen.",
+    creatingCode: "Erstelle Code...",
+    warnNeedSessionAndChallenge: "Erst einer Session beitreten und eine Challenge würfeln.",
+    warnNeedName: "Bitte einen Namen eingeben.",
+    warnNeedValidScore: "Bitte ein gültiges Ergebnis eingeben.",
+    warnScoreTooLarge: "Das Ergebnis wirkt unrealistisch groß, bitte prüfen.",
+    warnSubmitFailed: "Eintragen fehlgeschlagen, bitte nochmal versuchen.",
+    warnMinOneEventClass: "Wähle mindestens ein Event und eine Autoklasse aus.",
+    warnMinOneRule: "Wähle mindestens eine Zusatzregel aus, oder schalte die Zusatzregeln aus.",
+    shareTextPrefix: "Forza Horizon 6 Challenge:",
+    sessionCodeLabel: "Session-Code:",
+    carSuggestionsLabel: "Fahrzeugvorschläge",
+    events: {
+      "Streckenrennen":"Streckenrennen", "Dirt-Rennen":"Dirt-Rennen", "Querfeldeinrennen":"Querfeldeinrennen",
+      "Touge Rennen":"Touge Rennen", "Straßenrennen":"Straßenrennen", "Drag Rennen":"Drag Rennen",
+      "Blitzer":"Blitzer", "Blitzerzone":"Blitzerzone", "Gefahrenschild":"Gefahrenschild",
+      "Drift-Zone":"Drift-Zone", "Trailblazer":"Trailblazer"
+    },
+    rules: {
+      "Nacht-Rennen":"Nacht-Rennen", "Regenwetter":"Regenwetter", "Nur Handschaltung":"Nur Handschaltung",
+      "Fahrhilfen aus (ABS/TC)":"Fahrhilfen aus (ABS/TC)", "Cockpit-Perspektive Pflicht":"Cockpit-Perspektive Pflicht",
+      "Serienzustand (kein Tuning)":"Serienzustand (kein Tuning)", "Nur Hinterradantrieb":"Nur Hinterradantrieb",
+      "Schadensmodell: Simulation":"Schadensmodell: Simulation", "Nur ein Versuch (Ghost)":"Nur ein Versuch (Ghost)",
+      "Straßenreifen Pflicht":"Straßenreifen Pflicht"
+    },
+    carTypes: {
+      "Old-school Klassiker":"Old-school Klassiker", "Hot Hatch":"Hot Hatch", "Muscle Car":"Muscle Car",
+      "Moderne Sportwagen":"Moderne Sportwagen", "Rallye & Offroad":"Rallye & Offroad", "Track Toy":"Track Toy",
+      "Super-Limousine":"Super-Limousine", "Hypercar / Exot":"Hypercar / Exot"
+    }
+  },
+  en: {
+    eyebrow: "Horizon Festival &middot; Random Challenge Generator",
+    subtitle: "One spin decides: random event + car class. Face the combo, no matter how weird it gets.",
+    sharedBannerText: "📨 Challenge shared with you – loaded below.",
+    ok: "Ok",
+    tabChallenge: "Challenge",
+    tabSession: "Session",
+    tabHistory: "History",
+    tabSettings: "Settings",
+    event: "Event",
+    carClass: "Car Class",
+    extraRule: "Extra Rule",
+    startChallenge: "Start Challenge",
+    readyForFirstSpin: "Ready for the first spin.",
+    spinning: "Engine running...",
+    currentChallenge: "Current challenge:",
+    classWord: "Class",
+    otherSuggestions: "Other Suggestions",
+    copyResult: "Copy Result",
+    copied: "Copied!",
+    linkCopied: "Link copied!",
+    shareChallenge: "Share Challenge",
+    suggestionsFor: "Suggestions for class",
+    typeWord: "Type",
+    sessionLeaderboard: "Session Leaderboard",
+    sessionHint: "Join tonight's code, or start a new one.",
+    enterCode: "Enter CODE",
+    join: "Join",
+    newSession: "Start New Session",
+    sessionCode: "Session Code",
+    leave: "Leave",
+    endSession: "End Session",
+    yourName: "Your Name",
+    resultPlaceholder: "Result (time, points, meters...)",
+    submit: "Submit",
+    leaderboardWaiting: "Leaderboard – roll a challenge first",
+    leaderboardTitle: "Leaderboard –",
+    leaderboardEmpty: "No entries for this challenge yet.",
+    overallStandings: "Overall Session Standings",
+    standingsEmpty: "No points yet – enter a few challenge results first.",
+    sessionLogTitle: "Session Log (all entries today)",
+    nothingEnteredYet: "Nothing entered yet.",
+    higherWins: "higher wins",
+    lowerWins: "lower wins",
+    round: "round",
+    rounds: "rounds",
+    points: "pts",
+    deleteOwnEntry: "Delete your own entry",
+    historyTitle: "History",
+    clearHistory: "Clear History",
+    noChallengeYet: "No challenge started yet.",
+    eventsInPool: "Events in Pool",
+    classesInPool: "Car Classes in Pool",
+    rulesInPool: "Extra Rules in Pool",
+    enableRules: "Enable extra rules",
+    noRepeat: "No immediate repeat of the last combo",
+    confirmEndTitle: "Really end the session?",
+    confirmEndBody: "The session ends for <b>everyone</b> – no one can join this code afterwards, and anyone still active gets removed. The current standings will be shown as a wrap-up. The data stays in the cloud for safety regardless.",
+    cancel: "Cancel",
+    yesEnd: "Yes, end it",
+    sessionEnded: "Session Ended",
+    finalStandings: "Final Standings",
+    closeAndLeave: "Close & Leave Session",
+    noResultsEntered: "No results were entered.",
+    warnMinCodeLength: "Please enter a valid code (min. 4 characters).",
+    warnSessionEnded: "This session has already ended. Please use a different code.",
+    warnSessionEndedLive: "This session has ended.",
+    warnCodeGenFailed: "Code creation failed, please try again.",
+    creatingCode: "Creating code...",
+    warnNeedSessionAndChallenge: "Join a session and roll a challenge first.",
+    warnNeedName: "Please enter a name.",
+    warnNeedValidScore: "Please enter a valid result.",
+    warnScoreTooLarge: "That result looks unrealistically large, please double-check.",
+    warnSubmitFailed: "Submitting failed, please try again.",
+    warnMinOneEventClass: "Select at least one event and one car class.",
+    warnMinOneRule: "Select at least one extra rule, or turn extra rules off.",
+    shareTextPrefix: "Forza Horizon 6 Challenge:",
+    sessionCodeLabel: "Session code:",
+    carSuggestionsLabel: "Car suggestions",
+    events: {
+      "Streckenrennen":"Circuit Race", "Dirt-Rennen":"Dirt Race", "Querfeldeinrennen":"Cross Country",
+      "Touge Rennen":"Touge Race", "Straßenrennen":"Street Race", "Drag Rennen":"Drag Race",
+      "Blitzer":"Speed Trap", "Blitzerzone":"Speed Zone", "Gefahrenschild":"Danger Sign",
+      "Drift-Zone":"Drift Zone", "Trailblazer":"Trailblazer"
+    },
+    rules: {
+      "Nacht-Rennen":"Night Race", "Regenwetter":"Rain", "Nur Handschaltung":"Manual Transmission Only",
+      "Fahrhilfen aus (ABS/TC)":"Assists Off (ABS/TC)", "Cockpit-Perspektive Pflicht":"Cockpit View Required",
+      "Serienzustand (kein Tuning)":"Stock (No Tuning)", "Nur Hinterradantrieb":"RWD Only",
+      "Schadensmodell: Simulation":"Damage: Simulation", "Nur ein Versuch (Ghost)":"One Attempt Only (Ghost)",
+      "Straßenreifen Pflicht":"Street Tires Required"
+    },
+    carTypes: {
+      "Old-school Klassiker":"Old-School Classic", "Hot Hatch":"Hot Hatch", "Muscle Car":"Muscle Car",
+      "Moderne Sportwagen":"Modern Sports Car", "Rallye & Offroad":"Rally & Offroad", "Track Toy":"Track Toy",
+      "Super-Limousine":"Super Sedan", "Hypercar / Exot":"Hypercar / Exotic"
+    }
+  }
+};
+
+let currentLang = localStorage.getItem('fh6-lang') || 'de';
+
+function t(key){
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.de[key] || key;
+}
+function tEvent(name){
+  return (I18N[currentLang].events && I18N[currentLang].events[name]) || name;
+}
+function tRule(name){
+  return (I18N[currentLang].rules && I18N[currentLang].rules[name]) || name;
+}
+function tCarType(name){
+  return (I18N[currentLang].carTypes && I18N[currentLang].carTypes[name]) || name;
+}
+
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+  document.documentElement.lang = currentLang;
+}
 
 // Anonymous auth gives each browser a real, server-verified identity (unlike
 // the old localStorage device-id trick), so Firestore rules can actually
@@ -729,7 +978,7 @@ const EVENT_DIRECTION = {
   "Drift-Zone": "desc",
 };
 function directionLabel(eventName){
-  return EVENT_DIRECTION[eventName] === 'desc' ? 'höher gewinnt' : 'niedriger gewinnt';
+  return EVENT_DIRECTION[eventName] === 'desc' ? t('higherWins') : t('lowerWins');
 }
 
 const CLASSES = [
@@ -981,10 +1230,10 @@ function buildTrack(el, items, renderItem, repeats=8, extraClass=''){
 }
 
 function renderRaceItem(r){
-  return `${r.icon}<span class="txt">${r.name}</span>`;
+  return `${r.icon}<span class="txt">${tEvent(r.name)}</span>`;
 }
 function renderRuleItem(r){
-  return `${iconRule()}<span class="txt">${r.name}</span>`;
+  return `${iconRule()}<span class="txt">${tRule(r.name)}</span>`;
 }
 function renderClassItem(c){
   const s = classStyle(c);
@@ -1000,9 +1249,7 @@ function checkPools(){
   const rulesOk = !state.rulesEnabled || currentRulePool().length>0;
   const ok = rp.length>0 && cp.length>0 && rulesOk;
   goBtn.disabled = !ok;
-  warnMsg.textContent = ok ? '' : (rulesOk
-    ? 'Wähle mindestens ein Event und eine Autoklasse aus.'
-    : 'Wähle mindestens eine Zusatzregel aus, oder schalte die Zusatzregeln aus.');
+  warnMsg.textContent = ok ? '' : (rulesOk ? t('warnMinOneEventClass') : t('warnMinOneRule'));
   return ok;
 }
 
@@ -1061,9 +1308,12 @@ function renderCarSuggestions(className){
   const list = document.getElementById('car-chip-list');
   const { type, cars } = pickCarSuggestions(className, 3);
 
+  state.lastCarSuggestionClass = className;
+  state.lastCarSuggestionType = type;
+
   label.innerHTML = type
-    ? `Vorschläge für Klasse <b>${className}</b> &middot; Typ: <b>${type}</b>`
-    : `Vorschläge für Klasse <b>${className}</b>`;
+    ? `${t('suggestionsFor')} <b>${className}</b> &middot; ${t('typeWord')}: <b>${tCarType(type)}</b>`
+    : `${t('suggestionsFor')} <b>${className}</b>`;
   list.innerHTML = cars.map(name => `<span class="car-chip">${iconCar()}<span>${name}</span></span>`).join('');
   panel.style.display = cars.length ? 'block' : 'none';
 }
@@ -1074,7 +1324,7 @@ async function spin(){
   state.spinning = true;
   goBtn.disabled = true;
   document.querySelectorAll('.reel-window').forEach(w=>w.parentElement.classList.add('spinning'));
-  resultLine.textContent = 'Motor läuft...';
+  resultLine.textContent = t('spinning');
 
   const racePool = currentRacePool();
   const classPool = currentClassPool();
@@ -1103,8 +1353,8 @@ async function spin(){
 
   document.querySelectorAll('.reel-window').forEach(w=>w.parentElement.classList.remove('spinning'));
   resultLine.innerHTML = chosenRule
-    ? `Aktuelle Challenge: <b>${chosenRace.name}</b> &middot; Klasse <b>${chosenClass.name}</b> &middot; <b>${chosenRule.name}</b>`
-    : `Aktuelle Challenge: <b>${chosenRace.name}</b> &middot; Klasse <b>${chosenClass.name}</b>`;
+    ? `${t('currentChallenge')} <b>${tEvent(chosenRace.name)}</b> &middot; ${t('classWord')} <b>${chosenClass.name}</b> &middot; <b>${tRule(chosenRule.name)}</b>`
+    : `${t('currentChallenge')} <b>${tEvent(chosenRace.name)}</b> &middot; ${t('classWord')} <b>${chosenClass.name}</b>`;
 
   state.last = { race: chosenRace.name, cls: chosenClass.name, rule: chosenRule ? chosenRule.name : null };
   const clsObj = CLASSES.find(c=>c.name===chosenClass.name);
@@ -1129,19 +1379,23 @@ function renderHistory(){
     const li = document.createElement('li');
     li.innerHTML = `<span class="num">${String(state.history.length-i).padStart(2,'0')}</span>
       ${h.icon}
-      <span class="name">${h.race}${h.rule ? ' · '+h.rule : ''}</span>
+      <span class="name">${tEvent(h.race)}${h.rule ? ' · '+tRule(h.rule) : ''}</span>
       <span class="cls" style="color:${h.style.text};background:${h.style.bg};border:${h.style.border};${h.style.extra}">${h.cls}</span>`;
     list.appendChild(li);
   });
 }
 
 // ---- Filters ----
+// Safe to call repeatedly (e.g. on language switch): clears and rebuilds,
+// preserving each item's current on/off state from `state`.
 function buildFilters(){
   const raceWrap = document.getElementById('race-filters');
+  raceWrap.innerHTML = '';
   RACE_TYPES.forEach(r=>{
     const label = document.createElement('label');
-    label.className = 'chk active';
-    label.innerHTML = `<input type="checkbox" checked data-name="${r.name}"> ${r.icon} <span>${r.name}</span>`;
+    const isActive = state.raceActive.includes(r.name);
+    label.className = 'chk' + (isActive ? ' active' : '');
+    label.innerHTML = `<input type="checkbox" ${isActive?'checked':''} data-name="${r.name}"> ${r.icon} <span>${tEvent(r.name)}</span>`;
     label.querySelector('input').addEventListener('change', e=>{
       toggleSet(state.raceActive, r.name, e.target.checked);
       label.classList.toggle('active', e.target.checked);
@@ -1151,12 +1405,14 @@ function buildFilters(){
   });
 
   const classWrap = document.getElementById('class-filters');
+  classWrap.innerHTML = '';
   CLASSES.forEach(c=>{
     const label = document.createElement('label');
-    label.className = 'chk active';
+    const isActive = state.classActive.includes(c.name);
+    label.className = 'chk' + (isActive ? ' active' : '');
     const isHolo = c.color === 'holo';
     const swatchBg = isHolo ? classStyle(c).bg : c.color;
-    label.innerHTML = `<input type="checkbox" checked data-name="${c.name}"> <span class="swatch${isHolo?' holo':''}" style="background:${swatchBg}"></span> <span>${c.name}</span>`;
+    label.innerHTML = `<input type="checkbox" ${isActive?'checked':''} data-name="${c.name}"> <span class="swatch${isHolo?' holo':''}" style="background:${swatchBg}"></span> <span>${c.name}</span>`;
     label.querySelector('input').addEventListener('change', e=>{
       toggleSet(state.classActive, c.name, e.target.checked);
       label.classList.toggle('active', e.target.checked);
@@ -1166,10 +1422,12 @@ function buildFilters(){
   });
 
   const ruleWrap = document.getElementById('rule-filters');
+  ruleWrap.innerHTML = '';
   RULES.forEach(r=>{
     const label = document.createElement('label');
-    label.className = 'chk active';
-    label.innerHTML = `<input type="checkbox" checked data-name="${r.name}"> ${iconRule()} <span>${r.name}</span>`;
+    const isActive = state.ruleActive.includes(r.name);
+    label.className = 'chk' + (isActive ? ' active' : '');
+    label.innerHTML = `<input type="checkbox" ${isActive?'checked':''} data-name="${r.name}"> ${iconRule()} <span>${tRule(r.name)}</span>`;
     label.querySelector('input').addEventListener('change', e=>{
       toggleSet(state.ruleActive, r.name, e.target.checked);
       label.classList.toggle('active', e.target.checked);
@@ -1192,6 +1450,72 @@ buildFilters();
 renderHistory();
 checkPools();
 updateShareLink();
+applyStaticTranslations();
+
+function refreshDynamicTranslations(){
+  // Re-render everything already on screen in the new language, without
+  // re-rolling anything or causing side effects (no history writes, no
+  // fresh random car picks, no Firestore writes).
+  buildFilters();
+
+  if(state.last){
+    const raceObj = RACE_TYPES.find(r=>r.name===state.last.race);
+    const clsObj = CLASSES.find(c=>c.name===state.last.cls);
+    const ruleObj = state.last.rule ? RULES.find(r=>r.name===state.last.rule) : null;
+
+    if(raceObj){
+      buildTrack(raceTrackEl, [raceObj], renderRaceItem, 1);
+      raceTrackEl.style.transition = 'none';
+      raceTrackEl.style.transform = 'translateY(0px)';
+    }
+    if(clsObj){
+      buildTrack(classTrackEl, [clsObj], renderClassItem, 1);
+      classTrackEl.style.transition = 'none';
+      classTrackEl.style.transform = 'translateY(0px)';
+    }
+    if(ruleObj){
+      buildTrack(ruleTrackEl, [ruleObj], renderRuleItem, 1, 'rule-item');
+      ruleTrackEl.style.transition = 'none';
+      ruleTrackEl.style.transform = 'translateY(0px)';
+    }
+
+    resultLine.innerHTML = ruleObj
+      ? `${t('currentChallenge')} <b>${tEvent(state.last.race)}</b> &middot; ${t('classWord')} <b>${state.last.cls}</b> &middot; <b>${tRule(state.last.rule)}</b>`
+      : `${t('currentChallenge')} <b>${tEvent(state.last.race)}</b> &middot; ${t('classWord')} <b>${state.last.cls}</b>`;
+  } else {
+    buildTrack(raceTrackEl, RACE_TYPES, renderRaceItem);
+    buildTrack(classTrackEl, CLASSES, renderClassItem);
+    buildTrack(ruleTrackEl, RULES, renderRuleItem, 8, 'rule-item');
+  }
+
+  if(state.lastCarSuggestionClass && document.getElementById('car-suggestions').style.display !== 'none'){
+    const label = document.getElementById('car-suggestions-label');
+    const cls = state.lastCarSuggestionClass;
+    const type = state.lastCarSuggestionType;
+    label.innerHTML = type
+      ? `${t('suggestionsFor')} <b>${cls}</b> &middot; ${t('typeWord')}: <b>${tCarType(type)}</b>`
+      : `${t('suggestionsFor')} <b>${cls}</b>`;
+  }
+
+  renderHistory();
+  if(session.code){
+    updateSessionForCurrentChallenge();
+    renderSessionLog(session.lastEntries || []);
+    renderStandings(session.lastEntries || []);
+  }
+}
+
+function setLanguage(lang){
+  if(!I18N[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('fh6-lang', lang);
+  applyStaticTranslations();
+  refreshDynamicTranslations();
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setLanguage(btn.dataset.lang));
+});
 
 goBtn.addEventListener('click', spin);
 
@@ -1215,14 +1539,15 @@ document.getElementById('copy-btn').addEventListener('click', async ()=>{
   if(!state.last){ return; }
   const cars = [...document.querySelectorAll('#car-chip-list .car-chip span:last-child')].map(s=>s.textContent);
   const typeLabelEl = document.getElementById('car-suggestions-label');
-  const typeMatch = typeLabelEl ? typeLabelEl.textContent.match(/Typ:\s*(.+)$/) : null;
-  let text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}${state.last.rule ? ' · '+state.last.rule : ''}`;
-  if(cars.length) text += `\nFahrzeugvorschläge${typeMatch ? ' ('+typeMatch[1]+')' : ''}: ${cars.join(', ')}`;
+  const typeRegex = new RegExp(t('typeWord') + ':\\s*(.+)$');
+  const typeMatch = typeLabelEl ? typeLabelEl.textContent.match(typeRegex) : null;
+  let text = `${t('shareTextPrefix')} ${tEvent(state.last.race)} · ${t('classWord')} ${state.last.cls}${state.last.rule ? ' · '+tRule(state.last.rule) : ''}`;
+  if(cars.length) text += `\n${t('carSuggestionsLabel')}${typeMatch ? ' ('+typeMatch[1]+')' : ''}: ${cars.join(', ')}`;
   try{
     await navigator.clipboard.writeText(text);
     const btn = document.getElementById('copy-btn');
     const old = btn.textContent;
-    btn.textContent = 'Kopiert!';
+    btn.textContent = t('copied');
     setTimeout(()=>btn.textContent = old, 1400);
   }catch(e){ /* clipboard may be unavailable in sandbox */ }
 });
@@ -1271,8 +1596,8 @@ function applyChallengeStatic(raceName, clsName, ruleName, opts={}){
   }
 
   resultLine.innerHTML = ruleObj
-    ? `Aktuelle Challenge: <b>${raceObj.name}</b> &middot; Klasse <b>${clsObj.name}</b> &middot; <b>${ruleObj.name}</b>`
-    : `Aktuelle Challenge: <b>${raceObj.name}</b> &middot; Klasse <b>${clsObj.name}</b>`;
+    ? `${t('currentChallenge')} <b>${tEvent(raceObj.name)}</b> &middot; ${t('classWord')} <b>${clsObj.name}</b> &middot; <b>${tRule(ruleObj.name)}</b>`
+    : `${t('currentChallenge')} <b>${tEvent(raceObj.name)}</b> &middot; ${t('classWord')} <b>${clsObj.name}</b>`;
 
   state.last = { race: raceObj.name, cls: clsObj.name, rule: ruleObj ? ruleObj.name : null };
   state.history.unshift({ ...state.last, icon: raceObj.icon, style: classStyle(clsObj) });
@@ -1293,8 +1618,8 @@ function applySharedChallenge(raceName, clsName, ruleName){
 document.getElementById('share-btn').addEventListener('click', async ()=>{
   const url = buildShareUrl();
   if(!url || !state.last) return;
-  const text = `Forza Horizon 6 Challenge: ${state.last.race} · Klasse ${state.last.cls}${state.last.rule ? ' · '+state.last.rule : ''}`
-    + (session.code ? `\nSession-Code: ${session.code}` : '');
+  const text = `${t('shareTextPrefix')} ${tEvent(state.last.race)} · ${t('classWord')} ${state.last.cls}${state.last.rule ? ' · '+tRule(state.last.rule) : ''}`
+    + (session.code ? `\n${t('sessionCodeLabel')} ${session.code}` : '');
 
   // The native share sheet is flaky/crash-prone on some desktop Chrome builds
   // (RESULT_CODE_KILLED_BAD_MESSAGE). Only use it on touch devices, where
@@ -1308,7 +1633,7 @@ document.getElementById('share-btn').addEventListener('click', async ()=>{
       await navigator.clipboard.writeText(url);
       const btn = document.getElementById('share-btn');
       const old = btn.textContent;
-      btn.textContent = 'Link kopiert!';
+      btn.textContent = t('linkCopied');
       setTimeout(()=>btn.textContent = old, 1400);
     }catch(e){ /* clipboard unavailable */ }
   }
@@ -1406,7 +1731,7 @@ async function generateUniqueSessionCode(){
 async function joinSession(code){
   code = normalizeCode(code);
   if(code.length < 4){
-    document.getElementById('session-join-warn').textContent = 'Bitte einen gültigen Code eingeben (mind. 4 Zeichen).';
+    document.getElementById('session-join-warn').textContent = t('warnMinCodeLength');
     return;
   }
 
@@ -1414,7 +1739,7 @@ async function joinSession(code){
   try{
     const docSnap = await db.collection('sessions').doc(code).get();
     if(docSnap.exists && docSnap.data().ended === true){
-      document.getElementById('session-join-warn').textContent = 'Diese Session wurde bereits beendet. Bitte einen anderen Code verwenden.';
+      document.getElementById('session-join-warn').textContent = t('warnSessionEnded');
       return;
     }
   }catch(e){
@@ -1476,7 +1801,7 @@ function updateSessionForCurrentChallenge(){
   const submitBtn = document.getElementById('submit-score-btn');
 
   if(!key){
-    title.textContent = 'Bestenliste – erst eine Challenge würfeln';
+    title.textContent = t('leaderboardWaiting');
     badge.textContent = '';
     submitBtn.disabled = true;
     session.currentDocs = [];
@@ -1485,7 +1810,7 @@ function updateSessionForCurrentChallenge(){
   }
 
   submitBtn.disabled = false;
-  title.textContent = `Bestenliste – ${key.event} · Klasse ${key.cls}${key.rule ? ' · '+key.rule : ''}`;
+  title.textContent = `${t('leaderboardTitle')} ${tEvent(key.event)} · ${t('classWord')} ${key.cls}${key.rule ? ' · '+tRule(key.rule) : ''}`;
   badge.textContent = directionLabel(key.event);
 
   session.unsubCurrent = db.collection('sessions').doc(session.code).collection('entries')
@@ -1516,7 +1841,7 @@ function renderLeaderboard(){
       <span class="rank">${i+1}</span>
       <span class="pname">${escapeHtml(e.name)}</span>
       <span class="pscore">${e.score}</span>
-      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
+      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="${t('deleteOwnEntry')}">✕</button>` : ''}
     </li>`).join('');
 }
 
@@ -1531,8 +1856,8 @@ function renderSessionLog(items){
   empty.style.display = 'none';
   list.innerHTML = items.map(e => `
     <li>
-      <span><b>${escapeHtml(e.name)}</b> · ${escapeHtml(e.event)} · Klasse ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(e.rule) : ''} → <b>${e.score}</b></span>
-      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="Eigenen Eintrag löschen">✕</button>` : ''}
+      <span><b>${escapeHtml(e.name)}</b> · ${escapeHtml(tEvent(e.event))} · ${t('classWord')} ${escapeHtml(e.cls)}${e.rule ? ' · '+escapeHtml(tRule(e.rule)) : ''} → <b>${e.score}</b></span>
+      ${e.ownerUid === currentUid ? `<button class="del-entry-btn" data-id="${e.id}" title="${t('deleteOwnEntry')}">✕</button>` : ''}
     </li>
   `).join('');
 }
@@ -1609,8 +1934,8 @@ function renderStandings(entries){
   list.innerHTML = standings.map((s,i) => `
     <li class="rank-${i+1}">
       <span class="rank">${i+1}</span>
-      <span class="pname">${escapeHtml(s.name)} <span style="color:var(--ink-dim);font-weight:500;">(${s.rounds} Runde${s.rounds===1?'':'n'})</span></span>
-      <span class="pscore">${s.points} Pkt.</span>
+      <span class="pname">${escapeHtml(s.name)} <span style="color:var(--ink-dim);font-weight:500;">(${s.rounds} ${s.rounds===1?t('round'):t('rounds')})</span></span>
+      <span class="pscore">${s.points} ${t('points')}</span>
     </li>`).join('');
 }
 
@@ -1624,16 +1949,16 @@ async function submitScore(){
   const warn = document.getElementById('session-warn');
   warn.textContent = '';
   const key = currentChallengeKey();
-  if(!session.code || !key){ warn.textContent = 'Erst einer Session beitreten und eine Challenge würfeln.'; return; }
+  if(!session.code || !key){ warn.textContent = t('warnNeedSessionAndChallenge'); return; }
 
   const nameInput = document.getElementById('player-name-input');
   const scoreInput = document.getElementById('score-input');
   const name = nameInput.value.trim();
   const score = parseFloat(scoreInput.value);
 
-  if(!name){ warn.textContent = 'Bitte einen Namen eingeben.'; return; }
-  if(isNaN(score)){ warn.textContent = 'Bitte ein gültiges Ergebnis eingeben.'; return; }
-  if(Math.abs(score) >= 1000000){ warn.textContent = 'Das Ergebnis wirkt unrealistisch groß, bitte prüfen.'; return; }
+  if(!name){ warn.textContent = t('warnNeedName'); return; }
+  if(isNaN(score)){ warn.textContent = t('warnNeedValidScore'); return; }
+  if(Math.abs(score) >= 1000000){ warn.textContent = t('warnScoreTooLarge'); return; }
 
   localStorage.setItem('fh6-player-name', name);
   const submitBtn = document.getElementById('submit-score-btn');
@@ -1650,7 +1975,7 @@ async function submitScore(){
     scoreInput.value = '';
   }catch(e){
     console.error(e);
-    warn.textContent = 'Eintragen fehlgeschlagen, bitte nochmal versuchen.';
+    warn.textContent = t('warnSubmitFailed');
   }
   submitBtn.disabled = !currentChallengeKey();
 }
@@ -1665,13 +1990,13 @@ document.getElementById('new-session-btn').addEventListener('click', async ()=>{
   const btn = document.getElementById('new-session-btn');
   const old = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Erstelle Code...';
+  btn.textContent = t('creatingCode');
   try{
     const code = await generateUniqueSessionCode();
     joinSession(code);
   }catch(e){
     console.error('Session code generation failed:', e);
-    document.getElementById('session-join-warn').textContent = 'Code-Erstellung fehlgeschlagen, bitte nochmal versuchen.';
+    document.getElementById('session-join-warn').textContent = t('warnCodeGenFailed');
   }
   btn.disabled = false;
   btn.textContent = old;
@@ -1709,17 +2034,17 @@ function renderPodium(standings){
     <div class="podium-slot place-${i+1}">
       <span class="medal">${MEDALS[i]}</span>
       <span class="pname">${escapeHtml(s.name)}</span>
-      <span class="ppts">${s.points} Pkt. · ${s.rounds} Runde${s.rounds===1?'':'n'}</span>
+      <span class="ppts">${s.points} ${t('points')} · ${s.rounds} ${s.rounds===1?t('round'):t('rounds')}</span>
       <div class="podium-block">${i+1}</div>
     </div>`).join('');
 
   const others = standings.slice(3);
   rest.innerHTML = others.length === 0 ? '' : others.map((s,i) => `
-    <div class="rest-row"><span>${i+4}. <b>${escapeHtml(s.name)}</b></span><span>${s.points} Pkt.</span></div>
+    <div class="rest-row"><span>${i+4}. <b>${escapeHtml(s.name)}</b></span><span>${s.points} ${t('points')}</span></div>
   `).join('');
 
   if(standings.length === 0){
-    stage.innerHTML = '<p style="color:var(--ink-dim);text-align:center;width:100%;">Es wurden keine Ergebnisse eingetragen.</p>';
+    stage.innerHTML = `<p style="color:var(--ink-dim);text-align:center;width:100%;">${t('noResultsEntered')}</p>`;
   }
 }
 
