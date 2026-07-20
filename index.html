@@ -1691,9 +1691,10 @@ function listenSessionChallenge(){
       if(!data) return;
 
       if(data.ended === true){
-        if(session.selfEnded) return; // we triggered this ourselves, podium flow handles it
-        document.getElementById('session-join-warn').textContent = 'Diese Session wurde beendet.';
-        leaveSession();
+        if(session.selfEnded) return; // we triggered this ourselves, podium flow already showing
+        const standings = computeSessionStandings(session.lastEntries || []);
+        renderPodium(standings);
+        document.getElementById('podium-overlay').style.display = 'flex';
         return;
       }
 
